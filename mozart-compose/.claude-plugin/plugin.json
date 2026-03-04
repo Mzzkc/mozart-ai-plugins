@@ -1,6 +1,6 @@
 {
   "name": "mozart-compose",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Compose Mozart scores from goals — brainstorm, design, generate, validate, run. Turns ideas into executable orchestration configs.",
   "author": {
     "name": "Emzi",

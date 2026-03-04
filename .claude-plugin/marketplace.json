@@ -9,7 +9,7 @@
     {
       "name": "mozart-compose",
       "description": "Compose Mozart scores from goals — brainstorm, design, generate, validate, run. Turns ideas into executable orchestration configs.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "source": "./mozart-compose",
       "category": "development",
       "homepage": "https://github.com/Mzzkc/mozart-ai-compose"
