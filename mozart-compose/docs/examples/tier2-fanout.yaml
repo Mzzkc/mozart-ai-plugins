@@ -1,0 +1,267 @@
+# tier2-fanout.yaml
+#
+# Pattern: Fan-Out with Synthesis (3 stages, non-code domain)
+# Teaches: Data-driven fan-out, forced independence, synthesis
+#          for emergence (not summary), non-code orchestration
+#
+# Mozart orchestrates any complex work, not just code. This score
+# analyzes a topic from multiple independent perspectives, then
+# synthesizes insights that couldn't emerge from any single view.
+#
+# Execution Flow:
+#   Stage 1: Frame the question (1 sheet)
+#       |
+#   Stage 2: Independent analysis (4 parallel sheets)
+#       |
+#   Stage 3: Synthesis (1 sheet, waits for all 4)
+#
+# Key Lessons:
+#   - Fan-out instances are ISOLATED — they don't see each other
+#   - Convergence from isolation is real; from coordination is manufactured
+#   - Lookup dicts drive per-instance behavior (change data, not logic)
+#   - Synthesis finds convergence, tensions, emergence — not summary
+#   - Non-code scores use word count + structural markers for validation
+
+name: "multi-perspective-analysis"
+description: "Analyze a question from 4 independent perspectives, then synthesize"
+
+workspace: "/absolute/path/to/workspaces/analysis-workspace"
+
+backend:
+  type: claude_cli
+  skip_permissions: true
+  timeout_seconds: 1800
+  disable_mcp: true
+
+sheet:
+  size: 1
+  total_items: 3
+  fan_out:
+    2: 4
+  dependencies:
+    2: [1]
+    3: [2]
+
+parallel:
+  enabled: true
+  max_concurrent: 4
+
+cross_sheet:
+  auto_capture_stdout: true
+  max_output_chars: 5000
+  lookback_sheets: 5
+
+retry:
+  max_retries: 2
+
+prompt:
+  variables:
+    # ─────────────────────────────────────────
+    # CHANGE THESE for your specific question
+    # ─────────────────────────────────────────
+    question: >-
+      Should organizations adopt AI-assisted code review as their
+      primary quality gate, replacing traditional human-only review?
+
+    context: >-
+      The question sits at the intersection of software engineering
+      practice, organizational change, AI capability, and developer
+      experience. There are genuine tensions — not a clear answer.
+
+    # Each lens gets its own voice, focus, and analytical frame.
+    # Change the data to reuse this score for any multi-perspective analysis.
+    lenses:
+      1:
+        name: "engineer"
+        voice: >-
+          You are a senior software engineer with 15 years of experience
+          in code review. You think in systems, trade-offs, and failure
+          modes. You've seen tools come and go.
+        focus: "Technical capability, failure modes, integration with existing workflows"
+        seed: "What can AI actually catch vs. what requires human judgment? Where are the false positive/negative trade-offs?"
+
+      2:
+        name: "manager"
+        voice: >-
+          You are an engineering manager responsible for team velocity,
+          quality metrics, and developer satisfaction. You balance
+          business pressure with engineering excellence.
+        focus: "Productivity impact, team dynamics, quality metrics, organizational risk"
+        seed: "What happens to review culture when the primary reviewer isn't human? What do the metrics actually show?"
+
+      3:
+        name: "researcher"
+        voice: >-
+          You are a software engineering researcher who studies developer
+          tools and practices empirically. You distrust anecdotes and
+          demand evidence.
+        focus: "Empirical evidence, study methodology, what the data actually shows vs. claims"
+        seed: "What does the research literature say? Where are the gaps in evidence? What claims are unsupported?"
+
+      4:
+        name: "skeptic"
+        voice: >-
+          You are a critical thinker who questions assumptions and
+          challenges conventional wisdom. You look for hidden costs,
+          perverse incentives, and second-order effects.
+        focus: "Hidden costs, perverse incentives, what could go wrong, second-order effects"
+        seed: "What are we not talking about? What incentives does this create? Who benefits from the narrative?"
+
+  template: |
+    {% macro output_spec(filename) %}
+    ## Output
+    - **File**: {{ workspace }}/{{ filename }}
+    - **Format**: Markdown with clear section headers
+    - Ensure the document is complete, well-structured, and substantive
+    {% endmacro %}
+
+    {% if stage == 1 %}
+    # Framing
+
+    ## The Question
+    {{ question }}
+
+    ## Context
+    {{ context }}
+
+    ## Your Task
+    Frame this question for rigorous multi-perspective analysis:
+
+    1. **State the question precisely** — what exactly is being asked?
+    2. **Map the tension space** — what genuine tensions exist? (not strawmen)
+    3. **Identify assumptions** — what does the question take for granted?
+    4. **Define the evaluation dimensions** — what would a complete answer address?
+
+    The following perspectives will analyze this independently:
+    {% for i in range(1, 5) %}
+    - **{{ lenses[i].name | title }}**: {{ lenses[i].focus }}
+    {% endfor %}
+
+    {{ output_spec("01-framing.md") }}
+
+    {% elif stage == 2 %}
+    # {{ lenses[instance].name | title }} Analysis
+
+    {{ lenses[instance].voice }}
+
+    ## The Question
+    {{ question }}
+
+    Read the framing document at {{ workspace }}/01-framing.md for context.
+
+    ## Your Analytical Focus
+    {{ lenses[instance].focus }}
+
+    ## Seed Questions
+    {{ lenses[instance].seed }}
+
+    ## Your Task
+    Produce a thorough analysis from your perspective. You are working
+    independently — you cannot see what other analysts produce. This
+    isolation is the mechanism, not a limitation. Your honest, uncoordinated
+    perspective is what makes synthesis valuable.
+
+    Structure your analysis with:
+    - **Core Argument**: Your position on the question (take one, don't hedge)
+    - **Evidence**: What supports your position
+    - **Counterarguments**: What challenges your position (steel-man them)
+    - **Blind Spots**: What your perspective might miss
+    - **Key Insight**: The one thing your lens reveals that others might not see
+
+    {{ output_spec("02-analysis-" ~ instance ~ ".md") }}
+
+    {% elif stage == 3 %}
+    # Synthesis
+
+    Read all four analyses:
+    {% for i in range(1, 5) %}
+    - {{ workspace }}/02-analysis-{{ i }}.md ({{ lenses[i].name | title }})
+    {% endfor %}
+
+    ## Your Task
+    These four perspectives were produced independently. They could not see
+    each other's work. Your job is NOT to summarize them.
+
+    Find:
+
+    1. **Convergences** — Where did independent analysts reach the same
+       conclusion without coordination? This is signal. Uncoordinated
+       agreement means something.
+
+    2. **Tensions** — Where do they genuinely disagree? Don't resolve by
+       averaging. Find a reading that makes both positions true, or explain
+       why the tension is irreducible.
+
+    3. **Blind Spots** — What did ALL four perspectives miss? The gaps are
+       often more interesting than the content.
+
+    4. **Emergence** — What insight exists in the collision of perspectives
+       that no single analyst stated? What question arises from the
+       intersection that nobody was asking?
+
+    5. **Position** — Take one. Not a compromise. A position that is only
+       possible after hearing all four voices. Defend it.
+
+    6. **Remaining Question** — What is the most important question that
+       this analysis surfaced but did not answer?
+
+    {{ output_spec("03-synthesis.md") }}
+    {% endif %}
+
+validations:
+  # Stage 1: Framing is substantive
+  - type: file_exists
+    path: "{workspace}/01-framing.md"
+    condition: "stage == 1"
+    stage: 1
+
+  - type: content_regex
+    path: "{workspace}/01-framing.md"
+    pattern: "(?si)## .*(tension|assumption|dimension)"
+    condition: "stage == 1"
+    stage: 2
+    description: "Framing addresses tensions, assumptions, or dimensions"
+
+  - type: command_succeeds
+    command: 'test $(wc -w < "{workspace}/01-framing.md") -ge 300'
+    condition: "stage == 1"
+    stage: 2
+    description: "Framing has substantive content (300+ words)"
+
+  # Stage 2: Each analysis is substantive and structured
+  - type: file_exists
+    path: "{workspace}/02-analysis-{instance}.md"
+    condition: "stage == 2"
+    stage: 1
+
+  - type: content_regex
+    path: "{workspace}/02-analysis-{instance}.md"
+    pattern: "(?si)## .*(core argument|evidence|key insight)"
+    condition: "stage == 2"
+    stage: 2
+    description: "Analysis has required sections"
+
+  - type: command_succeeds
+    command: 'test $(wc -w < "{workspace}/02-analysis-{instance}.md") -ge 500'
+    condition: "stage == 2"
+    stage: 2
+    description: "Analysis has substantive content (500+ words)"
+
+  # Stage 3: Synthesis finds emergence, not just summary
+  - type: file_exists
+    path: "{workspace}/03-synthesis.md"
+    condition: "stage == 3"
+    stage: 1
+
+  - type: content_regex
+    path: "{workspace}/03-synthesis.md"
+    pattern: "(?si)(convergence|tension|blind spot|emergence|position)"
+    condition: "stage == 3"
+    stage: 2
+    description: "Synthesis addresses convergence, tensions, and emergence"
+
+  - type: command_succeeds
+    command: 'test $(wc -w < "{workspace}/03-synthesis.md") -ge 800'
+    condition: "stage == 3"
+    stage: 2
+    description: "Synthesis has substantive content (800+ words)"

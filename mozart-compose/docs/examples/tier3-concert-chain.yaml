@@ -1,0 +1,190 @@
+# tier3-concert-chain.yaml
+#
+# Pattern: Concert Chain (3 scores chaining via on_success)
+# Teaches: Multi-score orchestration, on_success hooks, workspace
+#          lifecycle, cross-score knowledge flow
+#
+# A concert is multiple scores that chain together. Each score
+# completes its work, then triggers the next via on_success hooks.
+# This is how you orchestrate work bigger than any single score.
+#
+# Concert Flow:
+#   Score 1 (this file): Design & Plan
+#       ↓ on_success: run_job
+#   Score 2: Implementation (generated or pre-existing)
+#       ↓ on_success: run_job
+#   Score 3: Review & Integration
+#
+# Key Lessons:
+#   - on_success job_paths MUST be absolute (daemon resolves from its CWD)
+#   - Workspace lifecycle: archive_on_fresh preserves history
+#   - inherit_learning: true flows patterns across scores
+#   - Each score is independently valid — can be run alone or in concert
+#   - detached: true for autonomous chains, false for sequential waits
+#
+# NOTE: This example shows Score 1. Scores 2 and 3 would be separate
+# YAML files. The concert is wired via on_success hooks.
+
+name: "concert-design-phase"
+description: "Design phase of a multi-score concert — plans the work, then chains to implementation"
+
+workspace: "/absolute/path/to/workspaces/concert-design"
+
+backend:
+  type: claude_cli
+  skip_permissions: true
+  timeout_seconds: 1800
+  disable_mcp: true
+
+# Concert mode: this score chains to the next on success
+concert:
+  enabled: true
+  max_chain_depth: 3
+  cooldown_between_jobs_seconds: 10
+  inherit_workspace: false
+
+# Archive old workspace on fresh runs (preserves history across concert iterations)
+workspace_lifecycle:
+  archive_on_fresh: true
+  max_archives: 5
+
+sheet:
+  size: 1
+  total_items: 3
+  dependencies:
+    2: [1]
+    3: [2]
+
+cross_sheet:
+  auto_capture_stdout: true
+  max_output_chars: 6000
+  lookback_sheets: 2
+
+retry:
+  max_retries: 2
+
+prompt:
+  variables:
+    feature: "user authentication with OAuth2"
+    project_root: "/absolute/path/to/project"
+    implementation_score: "/absolute/path/to/scores/concert-implement.yaml"
+    review_score: "/absolute/path/to/scores/concert-review.yaml"
+
+  template: |
+    {% if stage == 1 %}
+    # Requirements Analysis
+
+    ## Your Task
+    Analyze the requirements for: {{ feature }}
+
+    Working in project at: {{ project_root }}
+
+    Investigate:
+    1. What exactly needs to be built
+    2. What exists already that can be reused
+    3. What interfaces and contracts must be respected
+    4. What tests need to be written
+
+    Write a requirements document to {{ workspace }}/01-requirements.md with:
+    - **Scope**: What's in and out
+    - **Dependencies**: What this touches
+    - **Risks**: What could go wrong
+    - **Acceptance Criteria**: How we know it's done
+
+    {% elif stage == 2 %}
+    # Architecture Design
+
+    Read the requirements at {{ workspace }}/01-requirements.md.
+
+    ## Your Task
+    Design the architecture for implementing {{ feature }}.
+
+    Produce:
+    1. **Component diagram** — what pieces need to be built
+    2. **Interface contracts** — exact function signatures and data types
+    3. **Implementation order** — what to build first, second, third
+    4. **Test strategy** — what tests verify each component
+
+    The next score in this concert will receive this design and implement it.
+    Be specific enough that an agent reading ONLY your design document can
+    implement correctly without guessing.
+
+    Write to {{ workspace }}/02-design.md
+
+    {% elif stage == 3 %}
+    # Implementation Score Composition
+
+    Read the requirements at {{ workspace }}/01-requirements.md and
+    design at {{ workspace }}/02-design.md.
+
+    ## Your Task
+    The design will be passed to the next score in this concert for
+    implementation. Prepare a handoff document that:
+
+    1. Summarizes the key decisions from the design
+    2. Lists the exact files to create/modify (with paths)
+    3. Specifies the implementation order
+    4. Defines the acceptance criteria for each component
+
+    Write to {{ workspace }}/03-handoff.md
+
+    This handoff document will be injected as context into the
+    implementation score via its prelude configuration.
+
+    {% endif %}
+
+validations:
+  - type: file_exists
+    path: "{workspace}/01-requirements.md"
+    condition: "stage == 1"
+    stage: 1
+
+  - type: content_regex
+    path: "{workspace}/01-requirements.md"
+    pattern: "(?si)## Scope.*## Acceptance Criteria"
+    condition: "stage == 1"
+    stage: 2
+    description: "Requirements doc has Scope through Acceptance Criteria"
+
+  - type: command_succeeds
+    command: 'test $(wc -w < "{workspace}/01-requirements.md") -ge 400'
+    condition: "stage == 1"
+    stage: 2
+    description: "Requirements have substantive content"
+
+  - type: file_exists
+    path: "{workspace}/02-design.md"
+    condition: "stage == 2"
+    stage: 1
+
+  - type: content_regex
+    path: "{workspace}/02-design.md"
+    pattern: "(?si)(interface|contract|signature|function)"
+    condition: "stage == 2"
+    stage: 2
+    description: "Design specifies interfaces or contracts"
+
+  - type: command_succeeds
+    command: 'test $(wc -w < "{workspace}/02-design.md") -ge 500'
+    condition: "stage == 2"
+    stage: 2
+    description: "Design has substantive content"
+
+  - type: file_exists
+    path: "{workspace}/03-handoff.md"
+    condition: "stage == 3"
+    stage: 1
+
+  - type: content_regex
+    path: "{workspace}/03-handoff.md"
+    pattern: "(?si)(files? to (create|modify)|implementation order)"
+    condition: "stage == 3"
+    stage: 2
+    description: "Handoff specifies files and implementation order"
+
+# Chain to implementation score on success
+on_success:
+  - type: run_job
+    job_path: "/absolute/path/to/scores/concert-implement.yaml"
+    detached: true
+    description: "Chain to implementation phase"

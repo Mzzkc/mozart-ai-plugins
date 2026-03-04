@@ -1,0 +1,177 @@
+# tier1-pipeline.yaml
+#
+# Pattern: Sequential Pipeline (3 stages)
+# Teaches: Basic score structure, outcome-focused validations,
+#          stage conditionals, workspace conventions
+#
+# A simple linear pipeline: research → implement → verify.
+# No fan-out, no chaining. The baseline every score builds on.
+#
+# Execution Flow:
+#   Stage 1: Research the problem space
+#   Stage 2: Implement the solution
+#   Stage 3: Verify everything works
+#
+# Key Lessons:
+#   - Every sheet has outcome-focused validations (not just file_exists)
+#   - Prompts describe outcomes, not keystrokes
+#   - Conservative defaults: no cost limits, generous timeouts
+#   - Cross-sheet context flows research → implementation → verification
+
+name: "pipeline-example"
+description: "Research, implement, and verify a focused change"
+
+workspace: "/absolute/path/to/workspaces/pipeline-workspace"
+
+backend:
+  type: claude_cli
+  skip_permissions: true
+  timeout_seconds: 1800
+  disable_mcp: true
+
+sheet:
+  size: 1
+  total_items: 3
+  dependencies:
+    2: [1]
+    3: [2]
+
+cross_sheet:
+  auto_capture_stdout: true
+  max_output_chars: 4000
+  lookback_sheets: 2
+
+retry:
+  max_retries: 2
+
+prompt:
+  variables:
+    # ─────────────────────────────────────────
+    # CHANGE THESE for your specific task
+    # ─────────────────────────────────────────
+    target_area: "src/example/module.py"
+    goal: "Add input validation to the create_item endpoint"
+    test_command: "pytest tests/test_example.py -x -q"
+    project_context: >-
+      Python project using FastAPI, Pydantic v2, pytest.
+      Source in src/, tests in tests/.
+
+  template: |
+    {% if stage == 1 %}
+    # Research
+
+    ## Context
+    {{ project_context }}
+
+    ## Your Task
+    Investigate {{ target_area }} and the surrounding code to understand:
+
+    1. How the current implementation works
+    2. What input validation exists (if any)
+    3. What the test coverage looks like
+    4. What patterns the codebase uses for validation elsewhere
+
+    Write your findings to {{ workspace }}/01-research.md with these sections:
+    - **Current State**: How it works now
+    - **Gaps**: What's missing
+    - **Patterns**: How the codebase handles this elsewhere
+    - **Approach**: Recommended implementation approach
+
+    {% elif stage == 2 %}
+    # Implementation
+
+    ## Context
+    {{ project_context }}
+
+    Read the research at {{ workspace }}/01-research.md for context.
+
+    ## Your Task
+    {{ goal }}
+
+    Requirements:
+    - Follow the patterns identified in the research
+    - Write tests first (TDD)
+    - Ensure all existing tests still pass
+    - Work in {{ workspace }}
+
+    Write a summary of changes to {{ workspace }}/02-changes.md including:
+    - Files modified
+    - What was added/changed
+    - Test results
+
+    {% elif stage == 3 %}
+    # Verification
+
+    Read the change summary at {{ workspace }}/02-changes.md.
+
+    ## Your Task
+    Verify the implementation is correct and complete:
+
+    1. Run the full test suite: {{ test_command }}
+    2. Review the code changes for quality issues
+    3. Check that the implementation matches the research recommendations
+    4. Verify no regressions were introduced
+
+    Write a verification report to {{ workspace }}/03-verification.md with:
+    - **Test Results**: Full test output and pass/fail status
+    - **Code Quality**: Any issues found
+    - **Completeness**: Does the implementation match the goal?
+    - **Verdict**: Ready to merge or needs work
+
+    {% endif %}
+
+validations:
+  # Stage 1: Research produced substantive findings
+  - type: file_exists
+    path: "{workspace}/01-research.md"
+    condition: "stage == 1"
+    stage: 1
+    description: "Research document exists"
+
+  - type: content_contains
+    path: "{workspace}/01-research.md"
+    pattern: "## Approach"
+    condition: "stage == 1"
+    stage: 2
+    description: "Research includes recommended approach"
+
+  - type: command_succeeds
+    command: 'test $(wc -w < "{workspace}/01-research.md") -ge 200'
+    condition: "stage == 1"
+    stage: 2
+    description: "Research has substantive content (200+ words)"
+
+  # Stage 2: Implementation completed with tests
+  - type: file_exists
+    path: "{workspace}/02-changes.md"
+    condition: "stage == 2"
+    stage: 1
+    description: "Change summary exists"
+
+  - type: content_contains
+    path: "{workspace}/02-changes.md"
+    pattern: "Files modified"
+    condition: "stage == 2"
+    stage: 2
+    description: "Change summary documents what was modified"
+
+  # Stage 3: Verification confirms correctness
+  - type: file_exists
+    path: "{workspace}/03-verification.md"
+    condition: "stage == 3"
+    stage: 1
+    description: "Verification report exists"
+
+  - type: content_contains
+    path: "{workspace}/03-verification.md"
+    pattern: "## Verdict"
+    condition: "stage == 3"
+    stage: 2
+    description: "Verification includes a verdict"
+
+  - type: content_regex
+    path: "{workspace}/03-verification.md"
+    pattern: "(?i)(ready to merge|approved|passing)"
+    condition: "stage == 3"
+    stage: 2
+    description: "Verification verdict is positive"

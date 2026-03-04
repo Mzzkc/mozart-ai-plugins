@@ -1,0 +1,419 @@
+# tier5-investigation.yaml
+#
+# Pattern: Complex Investigation (7 stages, 13 sheets)
+# Teaches: Preprocessing enrichment, nested fan-out, data-driven
+#          lenses, Jinja macros, TDF-style review, strong validations
+#
+# The ceiling of score design. Multiple phases with different shapes:
+# preprocessing, parallel investigation, synthesis, and adversarial
+# review. Each phase builds on the last.
+#
+# Execution Flow:
+#   Stage 1: Frame the investigation (1 sheet)
+#       |
+#   Stage 2: Preprocessing — gather raw material (1 sheet)
+#       |
+#   Stage 3: Parallel investigation — 3 independent lenses (3 sheets)
+#       |
+#   Stage 4: Synthesis — collide perspectives (1 sheet)
+#       |
+#   Stage 5: Draft deliverable (1 sheet)
+#       |
+#   Stage 6: Adversarial review — 3 parallel reviewers (3 sheets)
+#       |
+#   Stage 7: Final deliverable incorporating review (1 sheet)
+#
+# Key Lessons:
+#   - Macros ({% macro %}) for DRY prompt templating
+#   - Preprocessing enriches downstream investigation (dual-phase pattern)
+#   - Investigation lenses are data-driven (change the dict, not the template)
+#   - Reviewers are adversarial — told not to trust the draft
+#   - Validations check outcomes at every phase
+
+name: "deep-investigation"
+description: "Multi-phase investigation with preprocessing, parallel analysis, synthesis, and adversarial review"
+
+workspace: "/absolute/path/to/workspaces/investigation-workspace"
+
+backend:
+  type: claude_cli
+  skip_permissions: true
+  timeout_seconds: 2400
+  disable_mcp: true
+
+sheet:
+  size: 1
+  total_items: 7
+  fan_out:
+    3: 3   # 3 parallel investigation lenses
+    6: 3   # 3 parallel adversarial reviewers
+  dependencies:
+    2: [1]
+    3: [2]
+    4: [3]
+    5: [4]
+    6: [5]
+    7: [6]
+
+parallel:
+  enabled: true
+  max_concurrent: 3
+
+cross_sheet:
+  auto_capture_stdout: true
+  max_output_chars: 6000
+  lookback_sheets: 6
+  capture_files:
+    - "{{ workspace }}/*.md"
+
+retry:
+  max_retries: 2
+
+stale_detection:
+  enabled: true
+  idle_timeout_seconds: 1800
+
+prompt:
+  variables:
+    # ─────────────────────────────────────────
+    # CHANGE THESE for your investigation
+    # ─────────────────────────────────────────
+    topic: "Whether the current error handling architecture is fit for purpose"
+    project_root: "/absolute/path/to/project"
+    project_context: >-
+      Python project, 80K+ lines, async throughout, Pydantic v2 models,
+      structured error codes (E0xx-E9xx). Source in src/, tests in tests/.
+
+    # Investigation lenses — each gets its own analytical frame
+    lenses:
+      1:
+        name: "structural"
+        voice: >-
+          You are a software architect who thinks in dependency graphs,
+          module boundaries, and information flow. You see the forest.
+        focus: "Error propagation paths, module boundaries, classification taxonomy"
+        question: "Does the error architecture express the right abstractions?"
+
+      2:
+        name: "operational"
+        voice: >-
+          You are a site reliability engineer who thinks in failure modes,
+          recovery paths, and observable behavior. You see what breaks.
+        focus: "Recovery strategies, diagnostic quality, failure observability"
+        question: "When things fail, can operators diagnose and recover?"
+
+      3:
+        name: "evolutionary"
+        voice: >-
+          You are a codebase archaeologist who thinks in historical layers,
+          accretion patterns, and technical debt. You see what was.
+        focus: "How errors evolved, inconsistencies between old and new patterns, debt"
+        question: "Has the error system kept pace with the codebase it serves?"
+
+    # Review lenses — adversarial perspectives on the draft
+    reviewers:
+      1:
+        name: "completeness"
+        focus: "What did the investigation miss? What questions weren't asked?"
+      2:
+        name: "rigor"
+        focus: "Are the claims supported by evidence? Are the conclusions justified?"
+      3:
+        name: "actionability"
+        focus: "Can someone act on these recommendations? Are they specific enough?"
+
+  template: |
+    {# ── Reusable macros ────────────────────────────────────── #}
+    {% macro output_spec(filename) %}
+    ## Output
+    - **File**: {{ workspace }}/{{ filename }}
+    - **Format**: Markdown with clear section headers
+    - Write a complete, well-structured document
+    {% endmacro %}
+
+    {% macro quality_bar(level) %}
+    {% if level == "high" %}
+    Quality: Be thorough. Cite specific file paths and line numbers.
+    No hedging. If you're uncertain, say what you'd need to verify.
+    {% elif level == "draft" %}
+    Quality: Prioritize coverage over polish. Mark uncertainties with [?].
+    {% endif %}
+    {% endmacro %}
+
+    {# ── Stage logic ────────────────────────────────────────── #}
+    {% if stage == 1 %}
+    # Framing
+
+    ## Topic
+    {{ topic }}
+
+    ## Project Context
+    {{ project_context }}
+    Project root: {{ project_root }}
+
+    ## Your Task
+    Frame this investigation:
+
+    1. **Restate the question precisely** — what exactly are we investigating?
+    2. **Map the territory** — what subsystems, files, and patterns are in scope?
+    3. **Define success** — what would a thorough answer look like?
+    4. **Identify unknowns** — what do we not know yet that we need to find out?
+
+    Three investigation lenses will analyze this independently:
+    {% for i in range(1, 4) %}
+    - **{{ lenses[i].name | title }}**: {{ lenses[i].focus }}
+    {% endfor %}
+
+    {{ output_spec("01-framing.md") }}
+    {{ quality_bar("draft") }}
+
+    {% elif stage == 2 %}
+    # Preprocessing
+
+    Read the framing at {{ workspace }}/01-framing.md.
+
+    ## Your Task
+    Gather the raw material that the investigation lenses will analyze.
+    This preprocessing enriches downstream analysis — do the tedious
+    data gathering so the investigators can focus on insight.
+
+    1. **Inventory** — list all error-related files, classes, functions in the project
+    2. **Patterns** — identify the error handling patterns used (try/except, error codes, custom exceptions)
+    3. **Metrics** — count error types, coverage of error codes, test coverage of error paths
+    4. **Map** — draw the error propagation graph (what raises, what catches, what surfaces to users)
+
+    {{ output_spec("02-preprocessing.md") }}
+    {{ quality_bar("high") }}
+
+    {% elif stage == 3 %}
+    # {{ lenses[instance].name | title }} Investigation
+
+    {{ lenses[instance].voice }}
+
+    Read the framing at {{ workspace }}/01-framing.md and
+    preprocessing data at {{ workspace }}/02-preprocessing.md.
+
+    ## Your Question
+    {{ lenses[instance].question }}
+
+    ## Your Focus
+    {{ lenses[instance].focus }}
+
+    ## Your Task
+    Investigate from your perspective. You are working independently —
+    other analysts are investigating the same system from different angles.
+    You cannot see their work.
+
+    Produce:
+    - **Findings**: What you discovered (with evidence: file paths, line numbers)
+    - **Assessment**: Your answer to your guiding question
+    - **Concerns**: What worries you most
+    - **Recommendations**: Specific, actionable improvements (not vague suggestions)
+
+    {{ output_spec("03-lens-" ~ instance ~ ".md") }}
+    {{ quality_bar("high") }}
+
+    {% elif stage == 4 %}
+    # Synthesis
+
+    Read all investigation outputs:
+    - {{ workspace }}/01-framing.md (framing)
+    - {{ workspace }}/02-preprocessing.md (raw data)
+    {% for i in range(1, 4) %}
+    - {{ workspace }}/03-lens-{{ i }}.md ({{ lenses[i].name }} lens)
+    {% endfor %}
+
+    ## Your Task
+    Three independent investigators analyzed the same system. Synthesize.
+
+    Find:
+    1. **Convergences** — where did they agree without coordination?
+    2. **Tensions** — where do they disagree? Don't average. Find a reading
+       that makes both positions true, or explain the irreducible tension.
+    3. **Blind spots** — what did ALL three miss?
+    4. **Emergence** — what insight exists in the collision that no single
+       investigator stated?
+    5. **Unified Assessment** — what is the overall state of the system
+       under investigation?
+
+    {{ output_spec("04-synthesis.md") }}
+    {{ quality_bar("high") }}
+
+    {% elif stage == 5 %}
+    # Draft Deliverable
+
+    Read the synthesis at {{ workspace }}/04-synthesis.md and all
+    supporting documents.
+
+    ## Your Task
+    Produce a comprehensive report and recommendation document:
+
+    1. **Executive Summary** — 3-5 sentences, the bottom line
+    2. **Current State** — what exists, how it works, where it falls short
+    3. **Findings** — organized by theme, with evidence
+    4. **Recommendations** — prioritized, specific, actionable
+    5. **Implementation Roadmap** — what to do first, second, third
+
+    This draft will be adversarially reviewed before finalization.
+
+    {{ output_spec("05-draft.md") }}
+    {{ quality_bar("high") }}
+
+    {% elif stage == 6 %}
+    # Adversarial Review: {{ reviewers[instance].name | title }}
+
+    Read the draft at {{ workspace }}/05-draft.md.
+
+    ## CRITICAL: Do Not Trust This Draft
+    The draft was produced by a synthesis of multiple analyses. It may
+    still have gaps, unsupported claims, or recommendations that sound
+    good but can't be acted on. Your job is to find problems.
+
+    ## Your Review Focus
+    {{ reviewers[instance].focus }}
+
+    ## Your Task
+    Review the draft adversarially from your perspective:
+
+    - **Problems Found**: Specific issues with evidence
+    - **Missing Elements**: What should be there but isn't
+    - **Strongest Parts**: What's genuinely good (be honest, not generous)
+    - **Verdict**: Acceptable / Needs revision / Fundamentally flawed
+
+    {{ output_spec("06-review-" ~ instance ~ ".md") }}
+
+    {% elif stage == 7 %}
+    # Final Deliverable
+
+    Read the draft at {{ workspace }}/05-draft.md and all reviews:
+    {% for i in range(1, 4) %}
+    - {{ workspace }}/06-review-{{ i }}.md ({{ reviewers[i].name }} review)
+    {% endfor %}
+
+    ## Your Task
+    Produce the final deliverable incorporating review feedback:
+
+    1. Address all problems flagged by reviewers
+    2. Fill gaps identified as missing
+    3. Strengthen weak areas
+    4. Keep what reviewers identified as strong
+    5. Add a "Review Integration" section documenting what changed and why
+
+    {{ output_spec("07-final.md") }}
+    {{ quality_bar("high") }}
+    {% endif %}
+
+validations:
+  # Stage 1: Framing
+  - type: file_exists
+    path: "{workspace}/01-framing.md"
+    condition: "stage == 1"
+    stage: 1
+
+  - type: command_succeeds
+    command: 'test $(wc -w < "{workspace}/01-framing.md") -ge 300'
+    condition: "stage == 1"
+    stage: 2
+    description: "Framing has substantive content"
+
+  # Stage 2: Preprocessing
+  - type: file_exists
+    path: "{workspace}/02-preprocessing.md"
+    condition: "stage == 2"
+    stage: 1
+
+  - type: content_regex
+    path: "{workspace}/02-preprocessing.md"
+    pattern: "(?si)(inventory|pattern|metric|map)"
+    condition: "stage == 2"
+    stage: 2
+    description: "Preprocessing covers inventory, patterns, metrics, or map"
+
+  - type: command_succeeds
+    command: 'test $(wc -w < "{workspace}/02-preprocessing.md") -ge 500'
+    condition: "stage == 2"
+    stage: 2
+    description: "Preprocessing has substantive content"
+
+  # Stage 3: Investigation lenses
+  - type: file_exists
+    path: "{workspace}/03-lens-{instance}.md"
+    condition: "stage == 3"
+    stage: 1
+
+  - type: content_regex
+    path: "{workspace}/03-lens-{instance}.md"
+    pattern: "(?si)(finding|assessment|recommendation)"
+    condition: "stage == 3"
+    stage: 2
+    description: "Investigation has findings, assessment, or recommendations"
+
+  - type: command_succeeds
+    command: 'test $(wc -w < "{workspace}/03-lens-{instance}.md") -ge 600'
+    condition: "stage == 3"
+    stage: 2
+    description: "Investigation has substantive content"
+
+  # Stage 4: Synthesis
+  - type: file_exists
+    path: "{workspace}/04-synthesis.md"
+    condition: "stage == 4"
+    stage: 1
+
+  - type: content_regex
+    path: "{workspace}/04-synthesis.md"
+    pattern: "(?si)(convergence|tension|emergence)"
+    condition: "stage == 4"
+    stage: 2
+    description: "Synthesis addresses convergence, tensions, and emergence"
+
+  # Stage 5: Draft
+  - type: file_exists
+    path: "{workspace}/05-draft.md"
+    condition: "stage == 5"
+    stage: 1
+
+  - type: content_regex
+    path: "{workspace}/05-draft.md"
+    pattern: "(?si)## Executive Summary.*## Recommendations"
+    condition: "stage == 5"
+    stage: 2
+    description: "Draft has Executive Summary through Recommendations"
+
+  - type: command_succeeds
+    command: 'test $(wc -w < "{workspace}/05-draft.md") -ge 1500'
+    condition: "stage == 5"
+    stage: 2
+    description: "Draft has substantial content (1500+ words)"
+
+  # Stage 6: Reviews
+  - type: file_exists
+    path: "{workspace}/06-review-{instance}.md"
+    condition: "stage == 6"
+    stage: 1
+
+  - type: content_contains
+    path: "{workspace}/06-review-{instance}.md"
+    pattern: "## Verdict"
+    condition: "stage == 6"
+    stage: 2
+    description: "Review includes a verdict"
+
+  # Stage 7: Final deliverable
+  - type: file_exists
+    path: "{workspace}/07-final.md"
+    condition: "stage == 7"
+    stage: 1
+
+  - type: content_contains
+    path: "{workspace}/07-final.md"
+    pattern: "Review Integration"
+    condition: "stage == 7"
+    stage: 2
+    description: "Final deliverable documents review integration"
+
+  - type: command_succeeds
+    command: 'test $(wc -w < "{workspace}/07-final.md") -ge 2000'
+    condition: "stage == 7"
+    stage: 2
+    description: "Final deliverable has substantial content (2000+ words)"

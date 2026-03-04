@@ -1,0 +1,185 @@
+# tier4-self-chain.yaml
+#
+# Pattern: Self-Chaining Loop (continuous improvement)
+# Teaches: Score chains to itself on success, fresh flag semantics,
+#          chain depth safety, workspace archival, idempotent design
+#
+# A score that runs, completes, archives its workspace, and starts
+# itself again with a clean slate. Each iteration inherits learning
+# but starts with fresh state. This is how Mozart does continuous
+# quality improvement, iterative refinement, and autonomous work.
+#
+# Execution Flow (per iteration):
+#   Stage 1: Assess current state
+#   Stage 2: Identify and fix one issue
+#   Stage 3: Verify the fix
+#       ↓ on_success (chains to self with --fresh)
+#   Next iteration: Assess → Fix → Verify → chain...
+#
+# Key Lessons:
+#   - fresh: true is CRITICAL for self-chains (without it, loads COMPLETED state, does nothing)
+#   - max_chain_depth prevents runaway infinite loops
+#   - archive_on_fresh preserves history across iterations
+#   - Each iteration is idempotent — works regardless of what previous iterations did
+#   - inherit_learning: true flows patterns across iterations
+
+name: "continuous-improvement"
+description: "Iteratively improve a codebase — assess, fix, verify, repeat"
+
+workspace: "/absolute/path/to/workspaces/improvement-workspace"
+
+backend:
+  type: claude_cli
+  skip_permissions: true
+  timeout_seconds: 1800
+  disable_mcp: true
+
+# Self-chaining concert configuration
+concert:
+  enabled: true
+  max_chain_depth: 5
+  cooldown_between_jobs_seconds: 30
+
+# Archive workspace on each fresh run so history is preserved
+workspace_lifecycle:
+  archive_on_fresh: true
+  max_archives: 10
+
+sheet:
+  size: 1
+  total_items: 3
+  dependencies:
+    2: [1]
+    3: [2]
+
+cross_sheet:
+  auto_capture_stdout: true
+  max_output_chars: 4000
+  lookback_sheets: 2
+
+retry:
+  max_retries: 2
+
+prompt:
+  variables:
+    project_root: "/absolute/path/to/project"
+    focus_area: "test quality and coverage"
+    test_command: "pytest tests/ -x -q"
+    lint_command: "ruff check src/"
+
+  template: |
+    {% if stage == 1 %}
+    # Assessment
+
+    ## Your Task
+    Assess the current state of {{ focus_area }} in {{ project_root }}.
+
+    This is an iterative improvement process. Previous iterations may have
+    already fixed some issues. Don't assume anything about prior state —
+    assess fresh.
+
+    Investigate and produce a prioritized list of issues:
+    1. Run {{ test_command }} — what fails? What's missing coverage?
+    2. Run {{ lint_command }} — what warnings exist?
+    3. Review the code for quality issues in the focus area
+
+    Rank issues by impact (high → low). Pick the SINGLE highest-impact
+    issue that can be fixed in one focused session.
+
+    Write to {{ workspace }}/01-assessment.md:
+    - **Current State**: Test results, lint results, key metrics
+    - **Issues Found**: Ranked list with severity
+    - **Selected Issue**: The one issue this iteration will fix
+    - **Why This One**: Why it's the highest impact
+
+    If no issues remain (everything is clean), write "NO_ISSUES_REMAINING"
+    in the assessment. The iteration will complete without further work.
+
+    {% elif stage == 2 %}
+    # Fix
+
+    Read the assessment at {{ workspace }}/01-assessment.md.
+
+    ## Your Task
+    Fix the selected issue identified in the assessment.
+
+    Requirements:
+    - Write a test that would have caught the issue (TDD)
+    - Implement the minimal fix
+    - Ensure all existing tests still pass
+    - Do not fix other issues — one issue per iteration
+
+    Write to {{ workspace }}/02-fix.md:
+    - **Issue**: What was wrong
+    - **Test Added**: What test verifies the fix
+    - **Fix Applied**: What changed
+    - **Files Modified**: List of changed files
+
+    {% elif stage == 3 %}
+    # Verify
+
+    Read the fix summary at {{ workspace }}/02-fix.md.
+
+    ## Your Task
+    Verify the fix is correct and complete:
+
+    1. Run {{ test_command }} — all tests must pass
+    2. Run {{ lint_command }} — no new warnings
+    3. Confirm the fix addresses the issue from the assessment
+    4. Confirm no regressions were introduced
+
+    Write to {{ workspace }}/03-verify.md:
+    - **Test Results**: Pass/fail with output
+    - **Lint Results**: Clean or issues
+    - **Verdict**: Fixed correctly / Needs more work
+
+    {% endif %}
+
+validations:
+  # Stage 1: Assessment produced a ranked issue list
+  - type: file_exists
+    path: "{workspace}/01-assessment.md"
+    condition: "stage == 1"
+    stage: 1
+
+  - type: content_regex
+    path: "{workspace}/01-assessment.md"
+    pattern: "(?si)(selected issue|NO_ISSUES_REMAINING)"
+    condition: "stage == 1"
+    stage: 2
+    description: "Assessment selects an issue or declares none remaining"
+
+  # Stage 2: Fix was applied
+  - type: file_exists
+    path: "{workspace}/02-fix.md"
+    condition: "stage == 2"
+    stage: 1
+
+  - type: content_contains
+    path: "{workspace}/02-fix.md"
+    pattern: "Files Modified"
+    condition: "stage == 2"
+    stage: 2
+    description: "Fix documents what files were changed"
+
+  # Stage 3: Verification confirms the fix
+  - type: file_exists
+    path: "{workspace}/03-verify.md"
+    condition: "stage == 3"
+    stage: 1
+
+  - type: content_contains
+    path: "{workspace}/03-verify.md"
+    pattern: "## Verdict"
+    condition: "stage == 3"
+    stage: 2
+    description: "Verification includes a verdict"
+
+# Self-chain: run this same score again on success
+on_success:
+  - type: run_job
+    # MUST be absolute path — daemon resolves from its own CWD
+    job_path: "/absolute/path/to/scores/tier4-self-chain.yaml"
+    detached: true
+    fresh: true  # CRITICAL: without this, loads COMPLETED state and does nothing
+    description: "Chain to next improvement iteration"
