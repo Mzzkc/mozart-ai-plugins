@@ -1,7 +1,7 @@
 ---
 name: venue-explorer
 description: |
-  Use this agent to explore a project's venue context before composing a Mozart score. Reads spec corpus, project docs, and structure to build a venue profile that informs score composition. Examples: <example>Context: Starting a new mozart-compose session and need to understand the project. user: "/mozart-compose add semantic search" assistant: "Let me explore the project context first." <commentary>The compose workflow needs venue context before it can brainstorm or compose. Dispatch venue-explorer to gather it.</commentary></example>
+  Use this agent to explore a project's venue context before composing a Mozart score. Reads spec corpus, project docs, and structure to build a venue profile that informs score composition. Examples: <example>Context: Starting a new mozart-compose session and need to understand the project. user: "/mozart:compose add semantic search" assistant: "Let me explore the project context first." <commentary>The compose workflow needs venue context before it can brainstorm or compose. Dispatch venue-explorer to gather it.</commentary></example>
 model: haiku
 color: green
 ---

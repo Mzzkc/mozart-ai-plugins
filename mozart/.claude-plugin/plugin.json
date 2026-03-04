@@ -1,7 +1,7 @@
 {
-  "name": "mozart-compose",
-  "version": "0.2.0",
-  "description": "Compose Mozart scores from goals — brainstorm, design, generate, validate, run. Turns ideas into executable orchestration configs.",
+  "name": "mozart",
+  "version": "0.3.0",
+  "description": "Mozart AI Compose plugin — compose scores, author configs, run and debug jobs. Turns ideas into executable orchestration configs.",
   "author": {
     "name": "Emzi",
     "url": "https://github.com/Mzzkc"

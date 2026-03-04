@@ -1,6 +1,6 @@
 ---
-name: mozart-compose
-description: Use when the user wants to compose a Mozart score from a goal, create an orchestration config, or turn an idea into an executable multi-stage AI workflow. Triggered by /mozart-compose or when the user describes work that would benefit from Mozart orchestration.
+name: compose
+description: Use when the user wants to compose a Mozart score from a goal, create an orchestration config, or turn an idea into an executable multi-stage AI workflow. Triggered by /mozart:compose or when the user describes work that would benefit from Mozart orchestration.
 ---
 
 # Mozart Compose

@@ -1,6 +1,6 @@
 ---
-name: mozart-score-authoring
-description: Use when writing, reviewing, or fixing Mozart score YAML configs. Covers syntax (Jinja vs format strings), validation engineering, prompt design, fan-out architecture, and common pitfalls. Do NOT use for running/debugging jobs (use mozart-usage instead).
+name: score-authoring
+description: Use when writing, reviewing, or fixing Mozart score YAML configs. Covers syntax (Jinja vs format strings), validation engineering, prompt design, fan-out architecture, and common pitfalls. Do NOT use for running/debugging jobs (use usage instead).
 ---
 
 # Mozart Score Authoring Skill
@@ -1175,7 +1175,7 @@ mozart run my-score.yaml --dry-run
 - Score writing guide: `docs/score-writing-guide.md`
 - Example scores: `examples/` directory
 - Fan-out gallery: [claude-compositions](https://github.com/Mzzkc/mozart-score-playspace) (7 creative scores)
-- Operational guide: mozart-usage skill (invoke via `/mozart-compose:mozart-usage`)
+- Operational guide: usage skill (invoke via `/mozart:usage`)
 
 ---
 

@@ -1,6 +1,6 @@
 ---
-name: mozart-usage
-description: Use when the user is running, monitoring, debugging, or recovering Mozart jobs. Covers the conductor, job lifecycle, diagnostics, config reload, recovery, self-healing, concert operations, and anti-patterns that lose work. Do NOT use for writing score configs (use mozart-score-authoring instead).
+name: usage
+description: Use when the user is running, monitoring, debugging, or recovering Mozart jobs. Covers the conductor, job lifecycle, diagnostics, config reload, recovery, self-healing, concert operations, and anti-patterns that lose work. Do NOT use for writing score configs (use score-authoring instead).
 ---
 
 # Mozart Usage Skill
