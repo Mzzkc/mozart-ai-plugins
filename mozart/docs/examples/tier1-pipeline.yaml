@@ -155,6 +155,17 @@ validations:
     stage: 2
     description: "Change summary documents what was modified"
 
+  # NOTE: User-defined prompt variables (like test_command) are NOT available
+  # in validation paths/commands. Only built-in variables are interpolated:
+  # {workspace}, {sheet_num}, {start_item}, {end_item}, {stage}, {instance}.
+  # So we hardcode the test command here to match the test_command variable above.
+  - type: command_succeeds
+    command: 'cd {workspace} && pytest tests/test_example.py -x -q'
+    condition: "stage == 2"
+    stage: 2
+    timeout_seconds: 300
+    description: "Tests pass after implementation"
+
   # Stage 3: Verification confirms correctness
   - type: file_exists
     path: "{workspace}/03-verification.md"
@@ -162,16 +173,19 @@ validations:
     stage: 1
     description: "Verification report exists"
 
+  # Anti-pattern avoided: Don't validate with regex like "(ready to merge|passing)"
+  # — the agent can trivially write those words without actually running tests.
+  # Instead, execute the test suite directly as a validation.
+  - type: command_succeeds
+    command: 'cd {workspace} && pytest tests/test_example.py -x -q'
+    condition: "stage == 3"
+    stage: 2
+    timeout_seconds: 300
+    description: "All tests pass after implementation"
+
   - type: content_contains
     path: "{workspace}/03-verification.md"
     pattern: "## Verdict"
     condition: "stage == 3"
     stage: 2
     description: "Verification includes a verdict"
-
-  - type: content_regex
-    path: "{workspace}/03-verification.md"
-    pattern: "(?i)(ready to merge|approved|passing)"
-    condition: "stage == 3"
-    stage: 2
-    description: "Verification verdict is positive"

@@ -182,6 +182,12 @@ validations:
     stage: 2
     description: "Handoff specifies files and implementation order"
 
+  - type: command_succeeds
+    command: 'test $(wc -w < "{workspace}/03-handoff.md") -ge 300'
+    condition: "stage == 3"
+    stage: 2
+    description: "Handoff has substantive content (300+ words)"
+
 # Chain to implementation score on success
 on_success:
   - type: run_job

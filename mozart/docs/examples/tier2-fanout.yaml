@@ -248,6 +248,9 @@ validations:
     description: "Analysis has substantive content (500+ words)"
 
   # Stage 3: Synthesis finds emergence, not just summary
+  # Anti-pattern avoided: A single OR-match like "(convergence|tension|emergence)"
+  # lets the agent satisfy validation by mentioning just ONE concept. Split into
+  # separate checks so the agent must demonstrate ALL required synthesis elements.
   - type: file_exists
     path: "{workspace}/03-synthesis.md"
     condition: "stage == 3"
@@ -255,10 +258,24 @@ validations:
 
   - type: content_regex
     path: "{workspace}/03-synthesis.md"
-    pattern: "(?si)(convergence|tension|blind spot|emergence|position)"
+    pattern: "(?si)(convergence|convergences)"
     condition: "stage == 3"
     stage: 2
-    description: "Synthesis addresses convergence, tensions, and emergence"
+    description: "Synthesis identifies convergences"
+
+  - type: content_regex
+    path: "{workspace}/03-synthesis.md"
+    pattern: "(?si)(tension|tensions|disagree)"
+    condition: "stage == 3"
+    stage: 2
+    description: "Synthesis addresses tensions"
+
+  - type: content_regex
+    path: "{workspace}/03-synthesis.md"
+    pattern: "(?si)(emergence|emergent|collision)"
+    condition: "stage == 3"
+    stage: 2
+    description: "Synthesis identifies emergent insights"
 
   - type: command_succeeds
     command: 'test $(wc -w < "{workspace}/03-synthesis.md") -ge 800'

@@ -317,6 +317,9 @@ validations:
     description: "Framing has substantive content"
 
   # Stage 2: Preprocessing
+  # Anti-pattern avoided: A single OR-match like "(inventory|pattern|metric|map)"
+  # lets the agent satisfy validation by mentioning just ONE concept. Split into
+  # separate checks so the agent must demonstrate multiple required elements.
   - type: file_exists
     path: "{workspace}/02-preprocessing.md"
     condition: "stage == 2"
@@ -324,10 +327,17 @@ validations:
 
   - type: content_regex
     path: "{workspace}/02-preprocessing.md"
-    pattern: "(?si)(inventory|pattern|metric|map)"
+    pattern: "(?si)(inventory|catalogue|list)"
     condition: "stage == 2"
     stage: 2
-    description: "Preprocessing covers inventory, patterns, metrics, or map"
+    description: "Preprocessing includes inventory of error-related code"
+
+  - type: content_regex
+    path: "{workspace}/02-preprocessing.md"
+    pattern: "(?si)(pattern|metric|count)"
+    condition: "stage == 2"
+    stage: 2
+    description: "Preprocessing identifies patterns or metrics"
 
   - type: command_succeeds
     command: 'test $(wc -w < "{workspace}/02-preprocessing.md") -ge 500'
@@ -336,6 +346,8 @@ validations:
     description: "Preprocessing has substantive content"
 
   # Stage 3: Investigation lenses
+  # Anti-pattern avoided: OR-match "(finding|assessment|recommendation)" lets
+  # agent pass by mentioning just one. Split into findings AND recommendations.
   - type: file_exists
     path: "{workspace}/03-lens-{instance}.md"
     condition: "stage == 3"
@@ -343,10 +355,17 @@ validations:
 
   - type: content_regex
     path: "{workspace}/03-lens-{instance}.md"
-    pattern: "(?si)(finding|assessment|recommendation)"
+    pattern: "(?si)(finding|discovered|found)"
     condition: "stage == 3"
     stage: 2
-    description: "Investigation has findings, assessment, or recommendations"
+    description: "Investigation includes findings"
+
+  - type: content_regex
+    path: "{workspace}/03-lens-{instance}.md"
+    pattern: "(?si)(recommend|suggestion|should)"
+    condition: "stage == 3"
+    stage: 2
+    description: "Investigation includes recommendations"
 
   - type: command_succeeds
     command: 'test $(wc -w < "{workspace}/03-lens-{instance}.md") -ge 600'
@@ -355,6 +374,8 @@ validations:
     description: "Investigation has substantive content"
 
   # Stage 4: Synthesis
+  # Anti-pattern avoided: Single OR-match "(convergence|tension|emergence)"
+  # split into separate required checks.
   - type: file_exists
     path: "{workspace}/04-synthesis.md"
     condition: "stage == 4"
@@ -362,10 +383,23 @@ validations:
 
   - type: content_regex
     path: "{workspace}/04-synthesis.md"
-    pattern: "(?si)(convergence|tension|emergence)"
+    pattern: "(?si)(convergence|converge)"
     condition: "stage == 4"
     stage: 2
-    description: "Synthesis addresses convergence, tensions, and emergence"
+    description: "Synthesis identifies convergences"
+
+  - type: content_regex
+    path: "{workspace}/04-synthesis.md"
+    pattern: "(?si)(tension|disagree|conflict)"
+    condition: "stage == 4"
+    stage: 2
+    description: "Synthesis addresses tensions"
+
+  - type: command_succeeds
+    command: 'test $(wc -w < "{workspace}/04-synthesis.md") -ge 800'
+    condition: "stage == 4"
+    stage: 2
+    description: "Synthesis has substantive content (800+ words)"
 
   # Stage 5: Draft
   - type: file_exists
@@ -398,6 +432,12 @@ validations:
     condition: "stage == 6"
     stage: 2
     description: "Review includes a verdict"
+
+  - type: command_succeeds
+    command: 'test $(wc -w < "{workspace}/06-review-{instance}.md") -ge 300'
+    condition: "stage == 6"
+    stage: 2
+    description: "Review has substantive content (300+ words)"
 
   # Stage 7: Final deliverable
   - type: file_exists

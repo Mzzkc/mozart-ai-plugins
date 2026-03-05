@@ -149,6 +149,12 @@ validations:
     stage: 2
     description: "Assessment selects an issue or declares none remaining"
 
+  - type: command_succeeds
+    command: 'test $(wc -w < "{workspace}/01-assessment.md") -ge 200'
+    condition: "stage == 1"
+    stage: 2
+    description: "Assessment has substantive content (200+ words)"
+
   # Stage 2: Fix was applied
   - type: file_exists
     path: "{workspace}/02-fix.md"
@@ -162,6 +168,17 @@ validations:
     stage: 2
     description: "Fix documents what files were changed"
 
+  # NOTE: User-defined prompt variables (like test_command) are NOT available
+  # in validation paths/commands. Only built-in variables are interpolated:
+  # {workspace}, {sheet_num}, {start_item}, {end_item}, {stage}, {instance}.
+  # So we hardcode the test command here to match the test_command variable above.
+  - type: command_succeeds
+    command: 'cd {workspace} && pytest tests/ -x -q'
+    condition: "stage == 2"
+    stage: 2
+    timeout_seconds: 300
+    description: "Tests pass after fix is applied"
+
   # Stage 3: Verification confirms the fix
   - type: file_exists
     path: "{workspace}/03-verify.md"
@@ -174,6 +191,13 @@ validations:
     condition: "stage == 3"
     stage: 2
     description: "Verification includes a verdict"
+
+  - type: command_succeeds
+    command: 'cd {workspace} && pytest tests/ -x -q'
+    condition: "stage == 3"
+    stage: 2
+    timeout_seconds: 300
+    description: "All tests pass during verification"
 
 # Self-chain: run this same score again on success
 on_success:
