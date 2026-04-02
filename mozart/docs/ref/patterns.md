@@ -34,12 +34,14 @@ Files in `{{ workspace }}` are how stages communicate beyond `previous_outputs`.
 
 ### Fan-Out (when `sheet.fan_out` configured)
 
-| Variable | Type | Description |
-|---|---|---|
-| `stage` | int | Logical stage (1-indexed, stable across expansion) |
-| `instance` | int | Instance within fan-out group (1-indexed) |
-| `fan_count` | int | Total instances in this stage's fan-out |
-| `total_stages` | int | Pre-expansion stage count |
+| Variable | Alias | Type | Description |
+|---|---|---|---|
+| `stage` | `movement` | int | Logical stage (1-indexed, stable across expansion) |
+| `instance` | `voice` | int | Instance within fan-out group (1-indexed) |
+| `fan_count` | `voice_count` | int | Total instances in this stage's fan-out |
+| `total_stages` | `total_movements` | int | Pre-expansion stage count |
+
+The aliases `movement`, `voice`, `voice_count`, and `total_movements` follow Mozart's orchestral vocabulary. Both forms work — use whichever reads better in your score.
 
 Without fan-out: `stage` = `sheet_num`, `total_stages` = `total_sheets`, `instance` = 1, `fan_count` = 1.
 
@@ -303,6 +305,47 @@ Parallel instances DON'T see each other. That's the mechanism, not a limitation.
 When parallel instances build components that must integrate (e.g., a client and a server, a CLI and a library, a UI and an API), each instance will independently invent its own interface. Three agents, three different function signatures. The synthesis/integration stage finds the mess, but by then the work is done wrong.
 
 **Fix:** Define shared interfaces in an upstream stage (plan or setup) and reference them from parallel instances. If stage 2 instances must agree on an API, stage 1 must specify it.
+
+## Per-Sheet Instruments
+
+Assign different instruments to different sheets. Useful for cost optimization (cheap instruments for simple work, expensive for complex) or multi-vendor workflows.
+
+### Per-Sheet Assignment
+
+```yaml
+instrument: claude-code          # Default for all sheets
+
+sheet:
+  per_sheet_instruments:
+    1: gemini-cli                # Sheet 1 uses Gemini
+    5: claude-code               # Sheet 5 uses Claude (same as default)
+  per_sheet_instrument_config:
+    1:
+      timeout_seconds: 600
+```
+
+### Batch Assignment via instrument_map
+
+```yaml
+sheet:
+  instrument_map:
+    gemini-cli: [1, 2, 3]       # Cheap sweeps
+    claude-code: [4, 5]          # Deep analysis
+```
+
+### Movement-Level Instruments
+
+```yaml
+movements:
+  1:
+    name: "Research"
+    instrument: gemini-cli       # All sheets in movement 1
+  2:
+    name: "Analysis"
+    instrument: claude-code      # All sheets in movement 2
+```
+
+Resolution order: per-sheet → movement → score-level default.
 
 ---
 

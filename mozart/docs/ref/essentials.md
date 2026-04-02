@@ -90,6 +90,7 @@ prompt:
 | `start_item` | int | First item number for this sheet |
 | `end_item` | int | Last item number for this sheet |
 | `workspace` | str | Absolute workspace path |
+| `instrument_name` | str | Name of the instrument executing this sheet (e.g., `claude-code`) |
 
 ### Validation Variables
 
@@ -320,11 +321,28 @@ prompt:
     Your prompt here for sheet {{ sheet_num }}.
 ```
 
-### Backend
+### Instrument (Recommended)
+
+```yaml
+# Use a named instrument (run `mozart instruments list` to see available)
+instrument: claude-code
+instrument_config:
+  timeout_seconds: 1800         # Per-sheet timeout (30 min default)
+  skip_permissions: true        # REQUIRED for unattended execution
+  disable_mcp: true             # ~2x speedup, prevents contention
+  cli_model: claude-sonnet-4-5-20250929  # Model override
+  allowed_tools: [Read, Grep, Glob, Write, Edit]  # Tool restrictions
+```
+
+Built-in instruments: `claude-code`, `gemini-cli`, `codex-cli`, `cline-cli`, `aider`, `goose`. Plus any CLI tool via YAML profiles in `~/.mozart/instruments/`.
+
+### Backend (Legacy Syntax)
+
+The `backend:` syntax still works but `instrument:` is preferred for new scores.
 
 ```yaml
 backend:
-  type: claude_cli              # claude_cli | anthropic_api | ollama
+  type: claude_cli              # claude_cli | anthropic_api | ollama | recursive_light
   skip_permissions: true        # REQUIRED for unattended execution
   timeout_seconds: 1800         # Per-sheet timeout (30 min default)
   disable_mcp: true             # ~2x speedup, prevents contention
@@ -333,7 +351,7 @@ backend:
   allowed_tools: [Read, Grep, Glob, Write, Edit]  # Tool restrictions
   system_prompt_file: ./system.md  # Custom system prompt
   cli_extra_args: ["--verbose"]    # Escape hatch
-  max_output_capture_bytes: 10240  # stdout/stderr capture (10KB)
+  max_output_capture_bytes: 51200  # stdout/stderr capture (50KB default)
   timeout_overrides:
     7: 28800                    # Per-sheet overrides (8 hours)
 ```
