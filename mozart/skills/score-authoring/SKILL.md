@@ -1,6 +1,6 @@
 ---
 name: score-authoring
-description: Use when writing, reviewing, or fixing Mozart score YAML configs. Covers syntax (Jinja vs format strings), validation engineering, prompt design, fan-out architecture, and common pitfalls. Do NOT use for running/debugging jobs (use usage instead).
+description: Use when writing, reviewing, or fixing Mozart score YAML configs. Covers syntax (Jinja vs format strings), validation engineering, prompt design, fan-out architecture, and common pitfalls. Do NOT use for running/debugging jobs (use command instead).
 ---
 
 # Mozart Score Authoring Skill
@@ -13,7 +13,7 @@ description: Use when writing, reviewing, or fixing Mozart score YAML configs. C
 
 | Use This Skill | Skip This Skill |
 |---|---|
-| Writing new Mozart score YAML | Debugging existing Mozart errors (use mozart-usage.md) |
+| Writing new Mozart score YAML | Debugging existing Mozart errors (use `/mozart:command`) |
 | Reviewing/fixing score configs | Running/monitoring jobs |
 | Understanding available features | CLI operations only |
 | Designing multi-stage workflows | |
@@ -61,4 +61,4 @@ ${CLAUDE_PLUGIN_ROOT}/docs/ref/advanced.md     — load for tier 3+
 
 - Example scores: `${CLAUDE_PLUGIN_ROOT}/docs/examples/` directory
 - Fan-out gallery: [claude-compositions](https://github.com/Mzzkc/mozart-score-playspace)
-- Operational guide: usage skill (invoke via `/mozart:usage`)
+- Operational guide: command skill (invoke via `/mozart:command`)

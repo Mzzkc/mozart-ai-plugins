@@ -1,9 +1,9 @@
 ---
-name: usage
+name: command
 description: Use when the user is running, monitoring, debugging, or recovering Mozart jobs. Covers the conductor, job lifecycle, diagnostics, config reload, recovery, self-healing, concert operations, and anti-patterns that lose work. Do NOT use for writing score configs (use score-authoring instead).
 ---
 
-# Mozart Usage Skill
+# Mozart Command Skill
 
 > **Purpose**: Run, monitor, debug, and recover Mozart jobs. Covers the conductor, job lifecycle, diagnostics, config reload, recovery, and the anti-patterns that lose work.
 
@@ -543,4 +543,4 @@ dashboard [--port]                -q, --quiet
 
 ---
 
-*Mozart Usage Skill --- operational guide for running, monitoring, and debugging Mozart AI Compose jobs.*
+*Mozart Command Skill --- operational guide for running, monitoring, and debugging Mozart AI Compose jobs.*

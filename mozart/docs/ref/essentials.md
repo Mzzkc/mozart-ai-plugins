@@ -507,7 +507,7 @@ mozart run my-score.yaml --dry-run
 
 - Example scores: `${CLAUDE_PLUGIN_ROOT}/docs/examples/` directory
 - Fan-out gallery: [claude-compositions](https://github.com/Mzzkc/mozart-score-playspace) (7 creative scores)
-- Operational guide: usage skill (invoke via `/mozart:usage`)
+- Operational guide: command skill (invoke via `/mozart:command`)
 
 ---
 
