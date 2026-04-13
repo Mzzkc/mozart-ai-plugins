@@ -5,6 +5,8 @@ description: Use when the user wants to compose a Mozart score from a goal, turn
 
 # Score Composition
 
+**This skill is your composition methodology. Follow it.** Do not skim it and compose from intuition. The workflow, the force analysis, the pattern reading, the structural derivation — each step exists because skipping it produces scores that name patterns without implementing them. Read the full skill before composing. Refer back to it during composition.
+
 Composition transforms a goal into a score — a program that orchestrates intelligences through coordinated work. The quality of your composition determines whether downstream agents succeed or fail. Every design decision affects work you will never see performed by agents you will never interact with.
 
 This skill teaches the act of composition itself. The score-authoring skill covers YAML syntax and mechanics. The usage skill covers running and debugging. This skill covers the cognitive process: understanding what to build, recognizing the forces that shape the solution, and designing a score whose structure faithfully serves the work.
