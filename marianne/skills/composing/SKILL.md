@@ -161,7 +161,7 @@ Before touching patterns or YAML:
 - What is the input? What data, files, or state does the work start from?
 - What is the output? What must exist when the score completes?
 - What are the units of work? Can they be processed independently?
-- What makes output wrong? What does failure look like?
+- What makes output wrong? What does failure look like? What distinguishes output that is merely done from output that is done well?
 - What varies across units? Do some require different treatment?
 - What must be shared? Do agents need common context or standards?
 - What depends on what? Which work must complete before other work begins?
@@ -209,7 +209,7 @@ Some boundaries can merge when a single stage genuinely serves both patterns' pu
 Place a boundary where:
 - The output format changes
 - The instrument should change
-- A validation gate is needed
+- Work should be verified before it feeds downstream — errors caught here are cheap; errors caught three stages later are expensive
 - Parallelism begins or ends
 - Context would exceed useful limits
 
@@ -236,9 +236,13 @@ If an agent needs content to do its work, inject it. Do not tell agents to "read
 
 ### Design Validations
 
-For every goal stated in the prompt, ask: **"Can the agent pass all my validations without achieving this goal?"**
+Three questions, in order:
 
-If yes, the validations are decorative. Add one that directly proves the goal was achieved.
+1. **"Can the agent pass all my validations without achieving this goal?"** If yes, the validations are decorative. Add one that directly proves the goal was achieved.
+
+2. **"If the work is done but done poorly, do my validations catch that?"** Completion and quality are different things. A file can exist but contain nothing useful. Code can pass tests but be unmaintainable. An analysis can have the right sections but draw no actual conclusions. Design validations that distinguish adequate from inadequate, not just present from absent.
+
+3. **"When a stage produces output that isn't good enough, what happens?"** If the answer is "nothing — it flows downstream and contaminates everything after it," the score has a structural gap. The work of catching problems early and addressing them before they cascade is itself work that belongs in the score's structure.
 
 Validations prove outcomes, not process. A file existing proves only that a file was created. Tests passing proves behavior. Structural markers prove the deliverable has the shape the prompt asked for.
 
