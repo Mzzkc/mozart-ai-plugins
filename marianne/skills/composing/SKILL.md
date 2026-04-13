@@ -80,16 +80,18 @@ UNDERSTAND → QUESTION → DESIGN GATE → COMPOSE → REVIEW → OFFER
 
 ### Phase 1: Understand
 
-Dispatch agents in parallel:
-
-1. **Always dispatch `venue-explorer`** — reads project structure, spec corpus, conventions. Returns a venue profile that informs composition.
-
-2. **Dispatch `codebase-analyzer` if the goal involves code changes** — analyzes relevant files, test infrastructure, architecture. Pass the user's goal so it investigates what matters. Skip for non-code goals.
-
-While agents work, study the user's goal:
+Study the user's goal:
 - What did they say they want?
 - What do they probably need but didn't articulate?
 - What would make the output wrong?
+
+**Offer to investigate the project** before designing. Investigation produces better scores — conventions discovered now prevent validation failures later. But the user may already have the context you need, or the goal may not require project-specific knowledge.
+
+If the user accepts (or doesn't object), dispatch investigation agents in parallel:
+
+1. **`venue-explorer`** — reads project structure, spec corpus, conventions. Returns a venue profile that informs composition. Use when composing for a specific project.
+
+2. **`codebase-analyzer`** — analyzes relevant files, test infrastructure, architecture. Pass the user's goal so it investigates what matters. Use when the goal involves code changes. Skip for non-code goals.
 
 When agents return, extract conventions the score must respect, constraints that affect design, and (for code goals) specific files, test commands, and integration points.
 
@@ -115,16 +117,16 @@ Wait for approval before proceeding.
 
 Generate the score YAML. This phase applies the composition methodology — see the next section.
 
-Before writing YAML, load the reference docs for your score's needs:
-- `${CLAUDE_PLUGIN_ROOT}/docs/ref/essentials.md` — needed for all scores (syntax, validations, config, pitfalls)
-- `${CLAUDE_PLUGIN_ROOT}/docs/ref/patterns.md` — for fan-out, multi-stage design, Jinja, prompt engineering
-- `${CLAUDE_PLUGIN_ROOT}/docs/ref/advanced.md` — for concerts, self-chaining, isolation, stale detection
+Before writing YAML, load the score-authoring reference. Invoke the `score-authoring` skill, or read the tiered reference docs directly:
+- `essentials.md` — needed for all scores (syntax, validations, config, pitfalls)
+- `patterns.md` — for fan-out, multi-stage design, Jinja, prompt engineering
+- `advanced.md` — for concerts, self-chaining, isolation, stale detection
 
-Or invoke the `score-authoring` skill to load all three at once.
+These live in this plugin's `docs/ref/` directory.
 
 ### Phase 5: Review
 
-Dispatch `score-reviewer` with the generated score, the user's goal, and the venue profile. The reviewer is adversarial — it assumes the score has problems until proven otherwise.
+Have the score reviewed adversarially — dispatch `score-reviewer` if available, or review it yourself with an adversarial stance: assume the score has problems until proven otherwise. Check workspace safety, syntax correctness, validation quality, and first-run safety.
 
 Fix all critical and important issues before presenting to the user.
 

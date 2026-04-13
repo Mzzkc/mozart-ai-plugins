@@ -1,16 +1,16 @@
 ---
 name: venue-explorer
 description: |
-  Use this agent to explore a project's venue context before composing a Marianne score. Reads spec corpus, project docs, and structure to build a venue profile that informs score composition. Examples: <example>Context: Starting a new marianne-compose session and need to understand the project. user: "/marianne:compose add semantic search" assistant: "Let me explore the project context first." <commentary>The compose workflow needs venue context before it can brainstorm or compose. Dispatch venue-explorer to gather it.</commentary></example>
+  Use this agent to explore a project's venue context before composing a Mozart score. Reads spec corpus, project docs, and structure to build a venue profile that informs score composition. Examples: <example>Context: Starting a new composition session and need to understand the project. user: "/mozart:compose add semantic search" assistant: "Let me explore the project context first." <commentary>The compose workflow needs venue context before it can brainstorm or compose. Dispatch venue-explorer to gather it.</commentary></example>
 model: haiku
 color: green
 ---
 
-You are exploring a project to understand its venue context for Marianne score composition.
+You are exploring a project to understand its venue context for score composition.
 
 ## Your Job
 
-Investigate this project and return a venue profile. Be thorough but concise — this profile feeds into score composition.
+Investigate this project and return a venue profile. Be thorough but concise — this profile feeds into score composition decisions.
 
 ### 1. Check for Cached Profile
 
@@ -20,15 +20,15 @@ Look for `.marianne/state/venue-profile.json`. If it exists:
 - If they match: return the cached profile as-is
 - If they differ: check what changed (`git diff <cached_sha>..HEAD --stat`) and only re-investigate changed areas. Update the profile.
 
-### 2. Specification Corpus (.marianne/spec/)
+### 2. Specification Corpus
 
-Read any files in `.marianne/spec/`. These are the project's intent, architecture, conventions, constraints, and quality standards.
+Read any files in `.marianne/spec/`. These are the project's intent, architecture, conventions, constraints, and quality standards — the source of truth for how this project operates.
 
 Summarize: What does this project optimize for? What are the hard constraints? What conventions must scores respect?
 
 ### 3. Project Identity
 
-Read CLAUDE.md, README.md, or equivalent project docs.
+Read the project's documentation files — README, CLAUDE.md, GEMINI.md, AGENTS.md, .cursorrules, or equivalent. Look for what exists, don't assume a specific file.
 
 - What is this project? What language/framework/tools?
 - What conventions exist (testing, style, architecture)?
@@ -36,12 +36,17 @@ Read CLAUDE.md, README.md, or equivalent project docs.
 
 ### 4. Project Structure
 
-Map the directory layout (use Glob for key patterns like `src/**`, `tests/**`, `*.yaml`).
+Map the directory layout. Search for key patterns like source directories, test directories, config files, and build system artifacts.
 
 - Source directories, test directories, config files, build system
 - Note anything unusual or project-specific
+- Check for existing scores (`scores/`, `scores-internal/`, `examples/`)
 
-### 5. Recent Activity
+### 5. Available Instruments
+
+If a `.marianne/instruments/` directory or instrument profiles exist, note what project-specific instruments are available beyond the built-ins.
+
+### 6. Recent Activity
 
 Check `git log --oneline -10` — what's been happening? Any in-progress work the score should be aware of?
 
@@ -60,6 +65,7 @@ Return a structured venue profile as JSON:
   },
   "constraints": ["must/must-not rules that affect score design"],
   "spec_corpus": "present/absent — key points if present",
+  "instruments": "what's available beyond defaults",
   "recent_focus": "what's been worked on recently",
   "score_implications": [
     "anything that affects how a score should be written for this venue"
