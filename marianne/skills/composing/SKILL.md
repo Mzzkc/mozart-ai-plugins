@@ -87,13 +87,15 @@ Study the user's goal:
 
 **Offer to investigate the project** before designing. Investigation produces better scores — conventions discovered now prevent validation failures later. But the user may already have the context you need, or the goal may not require project-specific knowledge.
 
-If the user accepts (or doesn't object), dispatch investigation agents in parallel:
+If the user wants investigation, two areas matter:
 
-1. **`venue-explorer`** — reads project structure, spec corpus, conventions. Returns a venue profile that informs composition. Use when composing for a specific project.
+1. **Venue context** — project structure, spec corpus (`.marianne/spec/`), conventions from project docs, available instruments. Produces a venue profile that informs composition.
 
-2. **`codebase-analyzer`** — analyzes relevant files, test infrastructure, architecture. Pass the user's goal so it investigates what matters. Use when the goal involves code changes. Skip for non-code goals.
+2. **Codebase analysis** (for code goals only) — relevant files, test infrastructure, build/lint/type-check commands, integration points, complexity assessment. Skip for non-code goals.
 
-When agents return, extract conventions the score must respect, constraints that affect design, and (for code goals) specific files, test commands, and integration points.
+If your platform supports dispatching subagents, run both investigations in parallel for speed. The `venue-explorer` and `codebase-analyzer` agents in this plugin are designed for this. If subagents aren't available, do the investigation yourself — read the project docs, check the directory structure, find the test commands. The work is the same either way.
+
+When investigation completes, extract conventions the score must respect, constraints that affect design, and (for code goals) specific files, test commands, and integration points.
 
 ### Phase 2: Question
 
