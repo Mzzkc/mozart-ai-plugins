@@ -174,12 +174,13 @@ The selection guide at `scores/rosetta-corpus/selection-guide.md` organizes patt
 
 ### Select Patterns
 
-Active forces point to candidate patterns. For each candidate:
+Active forces point to candidate patterns. For each candidate, **you must read the full pattern file** at `scores/rosetta-corpus/patterns/<name>.md`. Not a summary. Not from memory. The file itself. Pattern files contain the structural shape (stages, instrument guidance, DAG topology) that you need in the next step — without reading them, you cannot derive the score's structure and will produce a score that names the pattern without implementing it.
 
-1. **Read its full file** at `scores/rosetta-corpus/patterns/<name>.md` — the full file, not a summary
-2. **Check the signals.** Do they match your situation? Does the core dynamic address the forces you identified?
-3. **Check for a proof score** at `examples/patterns/` — not all patterns have them, but those that do (look for `proof_score:` in the pattern's frontmatter) are ground truth for how patterns become YAML.
-4. **Check `composes_with`** — natural compositions emerge from shared forces.
+After reading each pattern file:
+
+1. **Check the signals.** Do they match your situation? Does the core dynamic address the forces you identified?
+2. **Check for a proof score** at `examples/patterns/` — not all patterns have them, but those that do (look for `proof_score:` in the pattern's frontmatter) are ground truth for how patterns become YAML.
+3. **Check `composes_with`** — natural compositions emerge from shared forces.
 
 Before committing to a pattern:
 - Why this one and not an alternative that addresses the same forces?
