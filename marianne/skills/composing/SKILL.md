@@ -5,7 +5,9 @@ description: Use when the user wants to compose a Mozart score from a goal, turn
 
 # Score Composition
 
-**This skill is your composition methodology. Follow it.** Do not skim it and compose from intuition. The workflow, the force analysis, the pattern reading, the structural derivation — each step exists because skipping it produces scores that name patterns without implementing them. Read the full skill before composing. Refer back to it during composition.
+**This skill is your complete composition methodology. It replaces any general-purpose brainstorming or planning workflow for this task.** Do not invoke brainstorming, writing-plans, or other process skills — this skill contains its own workflow with phases specifically designed for score composition. Following a generic process produces generic scores. Following this process produces scores with structural fidelity.
+
+Do not skim and compose from intuition. The force analysis, the pattern reading, the structural derivation, the injection design — each step exists because skipping it produces scores that name patterns without implementing them. Read the full skill before composing. Refer back to it during composition.
 
 Composition transforms a goal into a score — a program that orchestrates intelligences through coordinated work. The quality of your composition determines whether downstream agents succeed or fail. Every design decision affects work you will never see performed by agents you will never interact with.
 
@@ -220,19 +222,24 @@ Do not place a boundary where:
 
 ### Select Instruments
 
+A score where every stage uses the same instrument is almost always wrong. Different stages do fundamentally different work — design requires deep reasoning, implementation requires tool access, verification requires independence, mechanical work requires speed not intelligence.
+
 Each pattern's stages include instrument guidance. Use it as a starting point, then consider:
 
-- What capability does each stage actually require? Match the instrument to the task.
-- Where is verification needed? Use a different model family for verification than for production — correlated models share blind spots.
+- What capability does each stage actually require? Reasoning depth, context window size, tool access, speed — match the instrument to what the stage actually needs.
+- Where is verification needed? Use a different model family for verification than for production — correlated models share blind spots. If Claude wrote it, Gemini reviews it.
 - Which stages are bottlenecks — where failure wastes the most downstream work? Use the strongest available instrument there.
-- Is any work deterministic? Tests, linting, structural comparison — these are CLI commands, not AI tasks.
+- Is any work deterministic? Tests, linting, structural comparison, file moves — these are CLI commands, not AI tasks. Use the cheapest instrument or a CLI tool.
+- Use named instrument definitions (`instruments:` in YAML) to create roles like `architect`, `builder`, `gate`, `reviewer` — then assign stages to roles. This makes instrument choices readable and changeable.
 
 ### Design Injections
 
-If an agent needs content to do its work, inject it. Do not tell agents to "read this file" — injection guarantees they receive it.
+Every score should use preludes and cadenzas. If an agent needs content to do its work, inject it — do not tell agents to "read this file." Telling is unreliable. Injection guarantees they receive it.
 
-- **Preludes** for shared context every sheet needs: conventions, standards, glossary
-- **Cadenzas** for per-sheet context: the specific input for this stage, the upstream output, per-instance data
+- **Preludes** — shared context injected into EVERY sheet. Conventions, standards, the spec document, glossary, anything all agents must know. A score without preludes leaves each agent to discover context independently — they will discover it differently, or not at all.
+- **Cadenzas** — per-sheet context injected into SPECIFIC sheets. The particular pattern file for this stage, the upstream output to review, per-instance data for fan-out specialization. Cadenzas are how you give each agent exactly the context their stage requires.
+
+A well-composed score uses both. Preludes establish the shared substrate. Cadenzas specialize each stage.
 
 ### Design Validations
 
