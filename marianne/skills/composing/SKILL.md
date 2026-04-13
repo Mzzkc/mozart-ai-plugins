@@ -222,15 +222,15 @@ Do not place a boundary where:
 
 ### Select Instruments
 
-A score where every stage uses the same instrument is almost always wrong. Different stages do fundamentally different work — design requires deep reasoning, implementation requires tool access, verification requires independence, mechanical work requires speed not intelligence.
+Different instruments, and different models within those instruments, were built for specific purposes. A large-context model excels at reading and synthesis. A fast model excels at mechanical tasks. A reasoning model excels at design and analysis. A CLI tool excels at deterministic operations. The goal is to match each sheet to the instrument whose purpose fits the work, with deep fallback chains so the score completes even when the preferred instrument is unavailable.
 
 Each pattern's stages include instrument guidance. Use it as a starting point, then consider:
 
 - What capability does each stage actually require? Reasoning depth, context window size, tool access, speed — match the instrument to what the stage actually needs.
-- Where is verification needed? Use a different model family for verification than for production — correlated models share blind spots. If Claude wrote it, Gemini reviews it.
+- Where is verification needed? Use a different model family for verification than for production — correlated models share blind spots.
 - Which stages are bottlenecks — where failure wastes the most downstream work? Use the strongest available instrument there.
-- Is any work deterministic? Tests, linting, structural comparison, file moves — these are CLI commands, not AI tasks. Use the cheapest instrument or a CLI tool.
-- Use named instrument definitions (`instruments:` in YAML) to create roles like `architect`, `builder`, `gate`, `reviewer` — then assign stages to roles. This makes instrument choices readable and changeable.
+- Is any work deterministic? Tests, linting, structural comparison, file moves — these are CLI commands, not AI tasks.
+- Every instrument assignment should have fallbacks (`instrument_fallbacks:`) so that rate limits or outages don't halt the score. The fallback chain should degrade gracefully — strong model → capable model → any model that can complete the work.
 
 ### Design Injections
 
