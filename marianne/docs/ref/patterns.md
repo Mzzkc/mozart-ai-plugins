@@ -1,4 +1,4 @@
-# Mozart Score Patterns
+# Marianne Score Patterns
 
 > Fan-out, synthesis, multi-stage design, Jinja mastery, and prompt engineering. Load this alongside essentials.md for tier 2+ scores.
 
@@ -41,7 +41,7 @@ Files in `{{ workspace }}` are how stages communicate beyond `previous_outputs`.
 | `fan_count` | `voice_count` | int | Total instances in this stage's fan-out |
 | `total_stages` | `total_movements` | int | Pre-expansion stage count |
 
-The aliases `movement`, `voice`, `voice_count`, and `total_movements` follow Mozart's orchestral vocabulary. Both forms work — use whichever reads better in your score.
+The aliases `movement`, `voice`, `voice_count`, and `total_movements` follow Marianne's orchestral vocabulary. Both forms work — use whichever reads better in your score.
 
 Without fan-out: `stage` = `sheet_num`, `total_stages` = `total_sheets`, `instance` = 1, `fan_count` = 1.
 
@@ -68,7 +68,7 @@ Any key defined in `prompt.variables` is available directly. **Warning**: user v
 
 ## Jinja Mastery
 
-Progressive techniques from basic to advanced. Every Mozart score uses these.
+Progressive techniques from basic to advanced. Every Marianne score uses these.
 
 ### Conditionals: The Multi-Stage Backbone
 
@@ -353,7 +353,7 @@ Resolution order: per-sheet → movement → score-level default.
 
 ### The Cardinal Rule: Outcomes, Not Methods
 
-Mozart orchestrates **general-purpose AI agents**. They reason, plan, and execute. Your prompt defines what success looks like, not the keystrokes to get there.
+Marianne orchestrates **general-purpose AI agents**. They reason, plan, and execute. Your prompt defines what success looks like, not the keystrokes to get there.
 
 ```yaml
 # BAD: Micromanaging the agent
@@ -390,7 +390,7 @@ prompt:
 
 ### Tell the Agent About Validations
 
-Mozart automatically injects validation rules into prompts, but being explicit in the template helps the agent aim:
+Marianne automatically injects validation rules into prompts, but being explicit in the template helps the agent aim:
 
 ```yaml
 prompt:
@@ -616,4 +616,4 @@ validations:
 
 ---
 
-*Mozart Score Patterns --- extracted from the score-authoring reference.*
+*Marianne Score Patterns --- extracted from the score-authoring reference.*

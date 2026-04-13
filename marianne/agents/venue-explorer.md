@@ -1,12 +1,12 @@
 ---
 name: venue-explorer
 description: |
-  Use this agent to explore a project's venue context before composing a Mozart score. Reads spec corpus, project docs, and structure to build a venue profile that informs score composition. Examples: <example>Context: Starting a new mozart-compose session and need to understand the project. user: "/mozart:compose add semantic search" assistant: "Let me explore the project context first." <commentary>The compose workflow needs venue context before it can brainstorm or compose. Dispatch venue-explorer to gather it.</commentary></example>
+  Use this agent to explore a project's venue context before composing a Marianne score. Reads spec corpus, project docs, and structure to build a venue profile that informs score composition. Examples: <example>Context: Starting a new marianne-compose session and need to understand the project. user: "/marianne:compose add semantic search" assistant: "Let me explore the project context first." <commentary>The compose workflow needs venue context before it can brainstorm or compose. Dispatch venue-explorer to gather it.</commentary></example>
 model: haiku
 color: green
 ---
 
-You are exploring a project to understand its venue context for Mozart score composition.
+You are exploring a project to understand its venue context for Marianne score composition.
 
 ## Your Job
 
@@ -14,15 +14,15 @@ Investigate this project and return a venue profile. Be thorough but concise —
 
 ### 1. Check for Cached Profile
 
-Look for `.mozart/state/venue-profile.json`. If it exists:
+Look for `.marianne/state/venue-profile.json`. If it exists:
 - Read it
 - Check the `git_sha` field against current HEAD (`git rev-parse HEAD`)
 - If they match: return the cached profile as-is
 - If they differ: check what changed (`git diff <cached_sha>..HEAD --stat`) and only re-investigate changed areas. Update the profile.
 
-### 2. Specification Corpus (.mozart/spec/)
+### 2. Specification Corpus (.marianne/spec/)
 
-Read any files in `.mozart/spec/`. These are the project's intent, architecture, conventions, constraints, and quality standards.
+Read any files in `.marianne/spec/`. These are the project's intent, architecture, conventions, constraints, and quality standards.
 
 Summarize: What does this project optimize for? What are the hard constraints? What conventions must scores respect?
 
@@ -69,6 +69,6 @@ Return a structured venue profile as JSON:
 }
 ```
 
-Also save this profile to `.mozart/state/venue-profile.json` for caching.
+Also save this profile to `.marianne/state/venue-profile.json` for caching.
 
 Be concise. Include what matters for score composition, skip what doesn't.

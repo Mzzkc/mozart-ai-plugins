@@ -1,11 +1,11 @@
 ---
 name: command
-description: Use when the user is running, monitoring, debugging, or recovering Mozart jobs. Covers the conductor, job lifecycle, diagnostics, config reload, recovery, self-healing, concert operations, and anti-patterns that lose work. Do NOT use for writing score configs (use score-authoring instead).
+description: Use when the user is running, monitoring, debugging, or recovering Marianne jobs. Covers the conductor, job lifecycle, diagnostics, config reload, recovery, self-healing, concert operations, and anti-patterns that lose work. Do NOT use for writing score configs (use score-authoring instead).
 ---
 
-# Mozart Command Skill
+# Marianne Command Skill
 
-> **Purpose**: Run, monitor, debug, and recover Mozart jobs. Covers the conductor, job lifecycle, diagnostics, config reload, recovery, and the anti-patterns that lose work.
+> **Purpose**: Run, monitor, debug, and recover Marianne jobs. Covers the conductor, job lifecycle, diagnostics, config reload, recovery, and the anti-patterns that lose work.
 
 ---
 
@@ -13,7 +13,7 @@ description: Use when the user is running, monitoring, debugging, or recovering 
 
 | Use This Skill | Skip This Skill |
 |---|---|
-| Running/monitoring Mozart jobs | Writing new score configs (use mozart-score-authoring) |
+| Running/monitoring Marianne jobs | Writing new score configs (use marianne-score-authoring) |
 | Debugging failed or stuck jobs | |
 | Resuming interrupted jobs | |
 | Understanding validation failures | |
@@ -23,43 +23,43 @@ description: Use when the user is running, monitoring, debugging, or recovering 
 
 ## Conductor: The Required Foundation
 
-**The conductor (daemon) is required for `mozart run`.** Without a running conductor, only `--dry-run` and `mozart validate` work.
+**The conductor (daemon) is required for `mzt run`.** Without a running conductor, only `--dry-run` and `mzt validate` work.
 
 ### Starting the Conductor
 
 ```bash
 # Foreground (development, see logs directly)
-mozart start --foreground
+mzt start --foreground
 
 # Background (production)
-mozart start
+mzt start
 
 # Detached from scripts (survives session end)
-setsid mozart start &
+setsid mzt start &
 ```
 
 ### Conductor Commands
 
 | Command | Purpose |
 |---|---|
-| `mozart start` | Start the conductor daemon |
-| `mozart start --foreground` | Start in foreground (development) |
-| `mozart start --profile dev` | Start with dev profile (debug logging, strace on) |
-| `mozart start --profile intensive` | Start with intensive profile (48h timeout, high limits) |
-| `mozart start --profile minimal` | Start with minimal profile (profiler + learning off) |
-| `mozart stop` | Stop the conductor (**only when no jobs are running**) |
-| `mozart stop --force` | Force-kill the conductor --- **NEVER with active jobs** |
-| `mozart restart` | Stop and restart |
-| `mozart restart --profile dev` | Restart with a profile |
-| `mozart conductor-status` | Check if conductor is running |
+| `mzt start` | Start the conductor daemon |
+| `mzt start --foreground` | Start in foreground (development) |
+| `mzt start --profile dev` | Start with dev profile (debug logging, strace on) |
+| `mzt start --profile intensive` | Start with intensive profile (48h timeout, high limits) |
+| `mzt start --profile minimal` | Start with minimal profile (profiler + learning off) |
+| `mzt stop` | Stop the conductor (**only when no jobs are running**) |
+| `mzt stop --force` | Force-kill the conductor --- **NEVER with active jobs** |
+| `mzt restart` | Stop and restart |
+| `mzt restart --profile dev` | Restart with a profile |
+| `mzt conductor-status` | Check if conductor is running |
 
 ### How Jobs Route Through the Conductor
 
-When you run `mozart run config.yaml`, the CLI checks for a running conductor via Unix socket. If found, the job is submitted through IPC and the CLI returns. The conductor manages job lifecycle, rate limit coordination across concurrent jobs, and event routing. If no conductor is found, the command exits with an error.
+When you run `mzt run config.yaml`, the CLI checks for a running conductor via Unix socket. If found, the job is submitted through IPC and the CLI returns. The conductor manages job lifecycle, rate limit coordination across concurrent jobs, and event routing. If no conductor is found, the command exits with an error.
 
-**The conductor runs your jobs.** `mozart run` is a client that submits work and returns. The job continues in the daemon regardless of whether your terminal stays open.
+**The conductor runs your jobs.** `mzt run` is a client that submits work and returns. The job continues in the daemon regardless of whether your terminal stays open.
 
-**NEVER stop the conductor while jobs are actively running.** Killing the daemon orphans all in-flight Claude agent processes and corrupts job state --- sheets get stuck as `in_progress` with no validation or cleanup. To reload config on a running job, use `mozart modify -c new.yaml --resume --wait`. To safely stop: pause all jobs first, wait for pauses to take effect, then `mozart stop`.
+**NEVER stop the conductor while jobs are actively running.** Killing the daemon orphans all in-flight Claude agent processes and corrupts job state --- sheets get stuck as `in_progress` with no validation or cleanup. To reload config on a running job, use `mzt modify -c new.yaml --resume --wait`. To safely stop: pause all jobs first, wait for pauses to take effect, then `mzt stop`.
 
 ---
 
@@ -68,14 +68,14 @@ When you run `mozart run config.yaml`, the CLI checks for a running conductor vi
 ### Submitting a Job
 
 ```bash
-mozart run config.yaml              # Submit (routes through conductor)
-mozart run config.yaml --dry-run    # Preview without running (no conductor needed)
-mozart run config.yaml --fresh      # Fresh start (clears previous state)
-mozart run config.yaml -s 5         # Start from sheet 5
-mozart run config.yaml -w /path     # Override workspace directory
-mozart run config.yaml --self-healing      # Auto-diagnose + fix on retry exhaustion
-mozart run config.yaml --self-healing --yes  # Auto-confirm suggested fixes
-mozart run config.yaml -j           # JSON output
+mzt run config.yaml              # Submit (routes through conductor)
+mzt run config.yaml --dry-run    # Preview without running (no conductor needed)
+mzt run config.yaml --fresh      # Fresh start (clears previous state)
+mzt run config.yaml -s 5         # Start from sheet 5
+mzt run config.yaml -w /path     # Override workspace directory
+mzt run config.yaml --self-healing      # Auto-diagnose + fix on retry exhaustion
+mzt run config.yaml --self-healing --yes  # Auto-confirm suggested fixes
+mzt run config.yaml -j           # JSON output
 ```
 
 | Option | Short | Description |
@@ -88,23 +88,23 @@ mozart run config.yaml -j           # JSON output
 | `--yes` | | Auto-confirm self-healing fixes |
 | `--json` | `-j` | Machine-readable output |
 
-`mozart run` is the only command that accepts `-w`/`--workspace`. All other commands resolve job context from the conductor's registry using the job ID.
+`mzt run` is the only command that accepts `-w`/`--workspace`. All other commands resolve job context from the conductor's registry using the job ID.
 
 ### Monitoring
 
 ```bash
-mozart status my-job                # Check status
-mozart status my-job --watch        # Live monitoring (refreshes every 5s)
-mozart status my-job -W -i 10       # Watch with 10s interval
-mozart status my-job -j             # JSON output
-mozart list                         # List active jobs
-mozart list --all                   # All jobs including completed/failed
-mozart list --status running        # Filter by status
-mozart logs my-job                  # View log entries
-mozart logs my-job --follow         # Tail logs
-mozart logs my-job --lines 200      # Last 200 lines
-mozart logs my-job --level ERROR    # ERROR and above
-mozart history my-job               # Execution history
+mzt status my-job                # Check status
+mzt status my-job --watch        # Live monitoring (refreshes every 5s)
+mzt status my-job -W -i 10       # Watch with 10s interval
+mzt status my-job -j             # JSON output
+mzt list                         # List active jobs
+mzt list --all                   # All jobs including completed/failed
+mzt list --status running        # Filter by status
+mzt logs my-job                  # View log entries
+mzt logs my-job --follow         # Tail logs
+mzt logs my-job --lines 200      # Last 200 lines
+mzt logs my-job --level ERROR    # ERROR and above
+mzt history my-job               # Execution history
 ```
 
 | Command | Key Options |
@@ -117,9 +117,9 @@ mozart history my-job               # Execution history
 ### Pausing
 
 ```bash
-mozart pause my-job                 # Graceful pause at next sheet boundary
-mozart pause my-job --wait          # Wait for acknowledgment
-mozart pause my-job --wait -t 30    # Wait with 30s timeout
+mzt pause my-job                 # Graceful pause at next sheet boundary
+mzt pause my-job --wait          # Wait for acknowledgment
+mzt pause my-job --wait -t 30    # Wait with 30s timeout
 ```
 
 | Option | Short | Description |
@@ -133,11 +133,11 @@ mozart pause my-job --wait -t 30    # Wait with 30s timeout
 ### Resuming
 
 ```bash
-mozart resume my-job                # Resume (auto-reloads config from YAML)
-mozart resume my-job -c fixed.yaml  # Resume with a different config file
-mozart resume my-job --no-reload    # Resume using cached snapshot
-mozart resume my-job --force        # Force resume a completed job
-mozart resume my-job --self-healing # Resume with self-healing
+mzt resume my-job                # Resume (auto-reloads config from YAML)
+mzt resume my-job -c fixed.yaml  # Resume with a different config file
+mzt resume my-job --no-reload    # Resume using cached snapshot
+mzt resume my-job --force        # Force resume a completed job
+mzt resume my-job --self-healing # Resume with self-healing
 ```
 
 | Option | Short | Description |
@@ -149,12 +149,12 @@ mozart resume my-job --self-healing # Resume with self-healing
 
 ### Modifying Running Jobs
 
-`mozart modify` requires a new config file (`-c` is mandatory).
+`mzt modify` requires a new config file (`-c` is mandatory).
 
 ```bash
-mozart modify my-job -c updated.yaml              # Pause and apply new config
-mozart modify my-job -c updated.yaml --resume      # Pause, apply, and resume
-mozart modify my-job -c updated.yaml --resume --wait  # Wait for pause before resume
+mzt modify my-job -c updated.yaml              # Pause and apply new config
+mzt modify my-job -c updated.yaml --resume      # Pause, apply, and resume
+mzt modify my-job -c updated.yaml --resume --wait  # Wait for pause before resume
 ```
 
 | Option | Short | Description |
@@ -167,21 +167,21 @@ mozart modify my-job -c updated.yaml --resume --wait  # Wait for pause before re
 ### Registry Cleanup
 
 ```bash
-mozart clear                        # Clear completed/failed/cancelled jobs
-mozart clear --job my-job           # Clear specific job
-mozart clear --status failed        # Clear only failed jobs
-mozart clear --older-than 3600      # Clear jobs older than 1 hour
-mozart clear --yes                  # Skip confirmation
+mzt clear                        # Clear completed/failed/cancelled jobs
+mzt clear --job my-job           # Clear specific job
+mzt clear --status failed        # Clear only failed jobs
+mzt clear --older-than 3600      # Clear jobs older than 1 hour
+mzt clear --yes                  # Skip confirmation
 ```
 
 ### Other Commands
 
 ```bash
-mozart validate config.yaml         # Pre-flight check (no conductor needed)
-mozart diagnose my-job              # Full diagnostic report
-mozart errors my-job --verbose      # Error details with stdout/stderr
-mozart dashboard                    # Start web dashboard (default port 8000)
-mozart patterns                     # View global learning patterns
+mzt validate config.yaml         # Pre-flight check (no conductor needed)
+mzt diagnose my-job              # Full diagnostic report
+mzt errors my-job --verbose      # Error details with stdout/stderr
+mzt dashboard                    # Start web dashboard (default port 8000)
+mzt patterns                     # View global learning patterns
 ```
 
 ---
@@ -192,26 +192,26 @@ mozart patterns                     # View global learning patterns
 
 ```bash
 # 1. ALWAYS start here
-mozart status my-job
+mzt status my-job
 
 # 2. If failed --- get diagnostics
-mozart diagnose my-job
+mzt diagnose my-job
 
 # 3. Error details
-mozart errors my-job --verbose
+mzt errors my-job --verbose
 
 # 4. Filter errors by sheet, type, or code
-mozart errors my-job --sheet 3
-mozart errors my-job --type rate_limit
-mozart errors my-job --code E201
+mzt errors my-job --sheet 3
+mzt errors my-job --type rate_limit
+mzt errors my-job --code E201
 
 # 5. Include log snippets in diagnostic
-mozart diagnose my-job --include-logs
+mzt diagnose my-job --include-logs
 
 # 6. THEN manual investigation if needed
 ```
 
-### Understanding `mozart status` Output
+### Understanding `mzt status` Output
 
 - **Status**: RUNNING, COMPLETED, FAILED, PAUSED, CANCELLED
 - **Validation**: Pass/Fail per sheet (a sheet can execute successfully but fail validation)
@@ -237,7 +237,7 @@ mozart diagnose my-job --include-logs
 
 ## Config Auto-Reload on Resume
 
-**Mozart auto-reloads config from the original YAML file on resume.** The cached `config_snapshot` is a fallback when the file no longer exists on disk.
+**Marianne auto-reloads config from the original YAML file on resume.** The cached `config_snapshot` is a fallback when the file no longer exists on disk.
 
 ### Priority Order
 
@@ -251,22 +251,22 @@ mozart diagnose my-job --include-logs
 **Fix a config error and resume:**
 ```bash
 # Edit the YAML file, then just resume --- auto-reloads
-mozart resume my-job
+mzt resume my-job
 ```
 
 **Use a completely different config:**
 ```bash
-mozart resume my-job -c fixed.yaml
+mzt resume my-job -c fixed.yaml
 ```
 
 **Deterministic replay from cached snapshot:**
 ```bash
-mozart resume my-job --no-reload
+mzt resume my-job --no-reload
 ```
 
 **Modify a running job's config:**
 ```bash
-mozart modify my-job -c updated.yaml --resume --wait
+mzt modify my-job -c updated.yaml --resume --wait
 ```
 
 ---
@@ -275,58 +275,58 @@ mozart modify my-job -c updated.yaml --resume --wait
 
 ### Rate Limit Recovery
 
-Mozart auto-waits when rate limited (default: 60 minutes, up to 24 cycles).
+Marianne auto-waits when rate limited (default: 60 minutes, up to 24 cycles).
 
 ```bash
-mozart status my-job    # Shows PAUSED (rate_limited)
+mzt status my-job    # Shows PAUSED (rate_limited)
 
 # If max_waits exhausted, just resume
-mozart resume my-job
+mzt resume my-job
 ```
 
 ### Validation Failure Recovery
 
 ```bash
 # 1. Check WHICH validation failed
-mozart errors my-job --verbose
+mzt errors my-job --verbose
 
 # 2a. Work complete but validation config is wrong --- fix YAML and resume
-mozart resume my-job    # auto-reloads fixed config
+mzt resume my-job    # auto-reloads fixed config
 
-# 2b. Work incomplete --- Mozart retries automatically
-mozart resume my-job
+# 2b. Work incomplete --- Marianne retries automatically
+mzt resume my-job
 ```
 
 ### Interrupted Job Recovery
 
 ```bash
 # First: always try resume
-mozart resume my-job
+mzt resume my-job
 
 # If resume fails with stale PID --- auto-clears since fix b474d45
-mozart resume my-job    # Retrying usually works
+mzt resume my-job    # Retrying usually works
 
 # If job is truly stuck, force resume
-mozart resume my-job --force
+mzt resume my-job --force
 ```
 
 ### State Corruption Recovery
 
 ```bash
 # Start fresh from specific sheet
-rm workspace/.mozart-state.db    # SQLite backend
-mozart run job.yaml --start-sheet N
+rm workspace/.marianne-state.db    # SQLite backend
+mzt run job.yaml --start-sheet N
 ```
 
 ### `--fresh` vs `resume`
 
 | Situation | Use |
 |---|---|
-| Job interrupted mid-progress | `mozart resume my-job` |
-| Job failed, config needs fixing | `mozart resume my-job` (auto-reloads fixed YAML) |
+| Job interrupted mid-progress | `mzt resume my-job` |
+| Job failed, config needs fixing | `mzt resume my-job` (auto-reloads fixed YAML) |
 | Self-chaining: completed an iteration | `--fresh` (via hook config) |
-| User explicitly wants to start over | `mozart run my-score.yaml --fresh` |
-| Job was cancelled or partially failed | `mozart resume my-job` (try first) |
+| User explicitly wants to start over | `mzt run my-score.yaml --fresh` |
+| Job was cancelled or partially failed | `mzt resume my-job` (try first) |
 
 **`--fresh` deletes checkpoint state and archives workspace artifacts.** It wipes hours of work if used on an interrupted job. When in doubt, try `resume` first.
 
@@ -335,9 +335,9 @@ mozart run job.yaml --start-sheet N
 ## Self-Healing
 
 ```bash
-mozart run job.yaml --self-healing
-mozart run job.yaml --self-healing --yes    # Auto-confirm fixes
-mozart resume my-job --self-healing
+mzt run job.yaml --self-healing
+mzt run job.yaml --self-healing --yes    # Auto-confirm fixes
+mzt resume my-job --self-healing
 ```
 
 **How it works**: After all retries exhausted, diagnostic context is collected, applicable remedies identified and ranked, automatic fixes applied without prompting, suggested fixes prompt unless `--yes`.
@@ -352,15 +352,15 @@ The conductor should be detached for long-running or unattended operation:
 
 ```bash
 # CORRECT: Fully detached conductor
-setsid mozart start &
+setsid mzt start &
 
 # Development: foreground (stays attached to terminal)
-mozart start --foreground
+mzt start --foreground
 ```
 
 **Why setsid for the conductor?** Creates an independent session group. The conductor survives terminal close, context compaction, and session end.
 
-**Jobs don't need setsid.** `mozart run` submits work to the conductor and returns. The job runs in the daemon regardless of your terminal session. Only the conductor itself needs to be detached.
+**Jobs don't need setsid.** `mzt run` submits work to the conductor and returns. The job runs in the daemon regardless of your terminal session. Only the conductor itself needs to be detached.
 
 ---
 
@@ -386,9 +386,9 @@ concert:
 ### Monitoring Chains
 
 ```bash
-mozart list --all                       # See all jobs (current and chained)
-mozart status quality-continuous-3      # Check specific job in chain
-mozart history quality-continuous-3     # View history of a chained job
+mzt list --all                       # See all jobs (current and chained)
+mzt status quality-continuous-3      # Check specific job in chain
+mzt history quality-continuous-3     # View history of a chained job
 ```
 
 ---
@@ -486,11 +486,11 @@ E3xx Config       E9xx Network
 
 | Never | Why | Do Instead |
 |---|---|---|
-| `timeout 600 mozart run ...` | SIGKILL corrupts state | Let Mozart handle timeouts internally |
+| `timeout 600 mzt run ...` | SIGKILL corrupts state | Let Marianne handle timeouts internally |
 | Assume exit_code=0 is success | Validations may have failed | Check `validation_details` |
-| Debug manually first | Mozart tools provide context | `status` -> `diagnose` -> `errors` |
-| Kill running job (SIGKILL) | Orphans agents, corrupts state | `mozart pause` for graceful stop |
-| Edit config during run | Changes ignored until reload | Pause first, then `mozart modify` |
+| Debug manually first | Marianne tools provide context | `status` -> `diagnose` -> `errors` |
+| Kill running job (SIGKILL) | Orphans agents, corrupts state | `mzt pause` for graceful stop |
+| Edit config during run | Changes ignored until reload | Pause first, then `mzt modify` |
 | Use `--fresh` on interrupted jobs | Destroys checkpoint state | Try `resume` first |
 | Stop conductor with active jobs | Orphans all in-flight agents | Pause all jobs first |
 
@@ -516,9 +516,9 @@ All commands support:
 ```
 CONDUCTOR                         DEBUGGING ORDER
 ---------                         ---------------
-start [--foreground|--profile]    1. mozart status ...
-stop [--force]                    2. mozart diagnose ...
-restart [--profile]               3. mozart errors --verbose
+start [--foreground|--profile]    1. mzt status ...
+stop [--force]                    2. mzt diagnose ...
+restart [--profile]               3. mzt errors --verbose
 conductor-status                  4. Manual investigation
 
 JOBS                              ERROR CATEGORIES
@@ -543,4 +543,4 @@ dashboard [--port]                -q, --quiet
 
 ---
 
-*Mozart Command Skill --- operational guide for running, monitoring, and debugging Mozart AI Compose jobs.*
+*Marianne Command Skill --- operational guide for running, monitoring, and debugging Marianne AI Compose jobs.*

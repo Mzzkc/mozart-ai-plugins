@@ -6,7 +6,7 @@
 #
 # A score that runs, completes, archives its workspace, and starts
 # itself again with a clean slate. Each iteration inherits learning
-# but starts with fresh state. This is how Mozart does continuous
+# but starts with fresh state. This is how Marianne does continuous
 # quality improvement, iterative refinement, and autonomous work.
 #
 # Execution Flow (per iteration):

@@ -1,18 +1,18 @@
 {
-  "name": "mozart-ai-plugins",
-  "description": "Plugin marketplace for Mozart AI Compose — orchestration tools for specification-driven AI agents",
+  "name": "marianne-ai-plugins",
+  "description": "Plugin marketplace for Marianne AI Compose — orchestration tools for specification-driven AI agents",
   "owner": {
     "name": "Emzi",
     "url": "https://github.com/Mzzkc"
   },
   "plugins": [
     {
-      "name": "mozart",
-      "description": "Mozart AI Compose plugin — compose scores, author configs, run and debug jobs. Turns ideas into executable orchestration configs.",
+      "name": "marianne",
+      "description": "Marianne AI Compose plugin — compose scores, author configs, run and debug jobs. Turns ideas into executable orchestration configs.",
       "version": "0.3.0",
-      "source": "./mozart",
+      "source": "./marianne",
       "category": "development",
-      "homepage": "https://github.com/Mzzkc/mozart-ai-compose"
+      "homepage": "https://github.com/Mzzkc/marianne-ai-compose"
     }
   ]
 }

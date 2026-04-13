@@ -1,4 +1,4 @@
-# Mozart Score Essentials
+# Marianne Score Essentials
 
 > Needed for ALL scores. Covers the critical syntax distinction, core variables, validation engineering, config structure, YAML gotchas, common pitfalls, and the pre-flight checklist.
 
@@ -6,7 +6,7 @@
 
 ## THE CRITICAL DISTINCTION: Two Syntax Systems
 
-Mozart uses **two different** template systems in the same YAML file. Confusing them is the #1 source of broken configs.
+Marianne uses **two different** template systems in the same YAML file. Confusing them is the #1 source of broken configs.
 
 ### Jinja2 (`{{ }}`) --- Prompt pipeline
 
@@ -324,7 +324,7 @@ prompt:
 ### Instrument (Recommended)
 
 ```yaml
-# Use a named instrument (run `mozart instruments list` to see available)
+# Use a named instrument (run `mzt instruments list` to see available)
 instrument: claude-code
 instrument_config:
   timeout_seconds: 1800         # Per-sheet timeout (30 min default)
@@ -334,7 +334,7 @@ instrument_config:
   allowed_tools: [Read, Grep, Glob, Write, Edit]  # Tool restrictions
 ```
 
-Built-in instruments: `claude-code`, `gemini-cli`, `codex-cli`, `cline-cli`, `aider`, `goose`. Plus any CLI tool via YAML profiles in `~/.mozart/instruments/`.
+Built-in instruments: `claude-code`, `gemini-cli`, `codex-cli`, `cline-cli`, `aider`, `goose`. Plus any CLI tool via YAML profiles in `~/.marianne/instruments/`.
 
 ### Backend (Legacy Syntax)
 
@@ -447,7 +447,7 @@ pattern: '\d+\.\s+'
 | 24 | Stale detection kills verification stages | Agent runs pytest/mypy/ruff as child processes; no stdout → killed at idle_timeout | Use `idle_timeout_seconds: 1800`+, or fan-out verification into parallel instances |
 | 25 | Process-only validations | Validations check file exists + tests pass + imports work, but never verify stated goals. Agent passes everything without fixing the actual problem. | For every goal in the prompt, ask: "Can the agent pass all validations without achieving this?" If yes, add one that can't. |
 | 26 | Workspace = project root | `workspace_lifecycle.archive_on_fresh` archives or wipes the workspace directory. If workspace = project root, the entire project is destroyed. | NEVER set workspace to the project root. Use `./workspaces/{name}-workspace` or a dedicated absolute path. Check for `.git/`, `package.json`, `pyproject.toml` at workspace path. |
-| 27 | `--fresh` when `resume` was intended | `--fresh` wipes ALL completed work and starts over. If you cancelled a job to fix config, using `--fresh` destroys all progress. | Use `mozart resume <job> --reload-config -c fixed.yaml` to continue from where you stopped. Only use `--fresh` for intentionally new runs. |
+| 27 | `--fresh` when `resume` was intended | `--fresh` wipes ALL completed work and starts over. If you cancelled a job to fix config, using `--fresh` destroys all progress. | Use `mzt resume <job> --reload-config -c fixed.yaml` to continue from where you stopped. Only use `--fresh` for intentionally new runs. |
 
 ---
 
@@ -455,10 +455,10 @@ pattern: '\d+\.\s+'
 
 ```bash
 # 1. Validate config structure
-mozart validate my-score.yaml
+mzt validate my-score.yaml
 
 # 2. Simulate execution (shows sheet division, rendered prompts)
-mozart run my-score.yaml --dry-run
+mzt run my-score.yaml --dry-run
 
 # 3. Verify:
 #    - Every sheet has at least one applicable validation?
@@ -471,7 +471,7 @@ mozart run my-score.yaml --dry-run
 #    - Absolute workspace path?
 ```
 
-### `mozart validate` Codes
+### `mzt validate` Codes
 
 | Code | Severity | Meaning |
 |---|---|---|
@@ -506,9 +506,9 @@ mozart run my-score.yaml --dry-run
 ## Reference
 
 - Example scores: `${CLAUDE_PLUGIN_ROOT}/docs/examples/` directory
-- Fan-out gallery: [claude-compositions](https://github.com/Mzzkc/mozart-score-playspace) (7 creative scores)
-- Operational guide: command skill (invoke via `/mozart:command`)
+- Fan-out gallery: [claude-compositions](https://github.com/Mzzkc/marianne-score-playspace) (7 creative scores)
+- Operational guide: command skill (invoke via `/marianne:command`)
 
 ---
 
-*Mozart Score Essentials --- extracted from the score-authoring reference.*
+*Marianne Score Essentials --- extracted from the score-authoring reference.*

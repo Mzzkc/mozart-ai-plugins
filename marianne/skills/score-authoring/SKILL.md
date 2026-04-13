@@ -1,11 +1,11 @@
 ---
 name: score-authoring
-description: Use when writing, reviewing, or fixing Mozart score YAML configs. Covers syntax (Jinja vs format strings), validation engineering, prompt design, fan-out architecture, and common pitfalls. Do NOT use for running/debugging jobs (use command instead).
+description: Use when writing, reviewing, or fixing Marianne score YAML configs. Covers syntax (Jinja vs format strings), validation engineering, prompt design, fan-out architecture, and common pitfalls. Do NOT use for running/debugging jobs (use command instead).
 ---
 
-# Mozart Score Authoring Skill
+# Marianne Score Authoring Skill
 
-> **Purpose**: Write correct, effective Mozart score configs. Routes to the appropriate reference docs based on score complexity.
+> **Purpose**: Write correct, effective Marianne score configs. Routes to the appropriate reference docs based on score complexity.
 
 ---
 
@@ -13,7 +13,7 @@ description: Use when writing, reviewing, or fixing Mozart score YAML configs. C
 
 | Use This Skill | Skip This Skill |
 |---|---|
-| Writing new Mozart score YAML | Debugging existing Mozart errors (use `/mozart:command`) |
+| Writing new Marianne score YAML | Debugging existing Marianne errors (use `/marianne:command`) |
 | Reviewing/fixing score configs | Running/monitoring jobs |
 | Understanding available features | CLI operations only |
 | Designing multi-stage workflows | |
@@ -53,12 +53,12 @@ ${CLAUDE_PLUGIN_ROOT}/docs/ref/patterns.md     — load for tier 2+
 ${CLAUDE_PLUGIN_ROOT}/docs/ref/advanced.md     — load for tier 3+
 ```
 
-**When this skill is invoked directly** (e.g., `/mozart:score-authoring`), load all three docs — the caller may need any level of detail.
+**When this skill is invoked directly** (e.g., `/marianne:score-authoring`), load all three docs — the caller may need any level of detail.
 
 ---
 
 ## Additional Resources
 
 - Example scores: `${CLAUDE_PLUGIN_ROOT}/docs/examples/` directory
-- Fan-out gallery: [claude-compositions](https://github.com/Mzzkc/mozart-score-playspace)
-- Operational guide: command skill (invoke via `/mozart:command`)
+- Fan-out gallery: [claude-compositions](https://github.com/Mzzkc/marianne-score-playspace)
+- Operational guide: command skill (invoke via `/marianne:command`)

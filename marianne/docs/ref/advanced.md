@@ -1,4 +1,4 @@
-# Mozart Score Advanced
+# Marianne Score Advanced
 
 > Concert mode, chaining, isolation, operational config, stale detection, and verification strategies. Load this alongside essentials.md and patterns.md for tier 4-5 scores.
 
@@ -123,4 +123,4 @@ Measure first (`time pytest tests/ -x -q`), then set `timeout_seconds` to **max(
 
 ---
 
-*Mozart Score Advanced --- extracted from the score-authoring reference.*
+*Marianne Score Advanced --- extracted from the score-authoring reference.*
