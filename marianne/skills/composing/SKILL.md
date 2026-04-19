@@ -19,7 +19,7 @@ Composition needs corpus vocabulary in working memory. But dumping the whole cor
 
 **Tier 1 — before you analyze forces:**
 
-1. `scores/rosetta-corpus/INDEX.md` — all 56 patterns, by scale, with problems and signals.
+1. `scores/rosetta-corpus/INDEX.md` — the full pattern catalog, by scale, with problems and signals.
 2. `scores/rosetta-corpus/forces.md` — the ten forces and their generators.
 
 **Tier 2 — just-in-time, as you select patterns:**
@@ -109,7 +109,7 @@ Every coordination problem has a force profile. Forces drive pattern selection.
 
 ### The Rosetta Corpus
 
-The corpus contains 56 coordination patterns organized by scale — within-stage, score-level, concert-level, and cross-cutting. Each pattern file carries: problem, signals, forces, generators, stages (the shape), composes-with, core dynamic, failure mode, and a YAML sketch.
+The corpus is a growing catalog of coordination patterns organized by scale — within-stage, score-level, concert-level, and cross-cutting. Each pattern file carries: problem, signals, forces, generators, stages (the shape), composes-with, core dynamic, failure mode, and a YAML sketch. New patterns land as novel shapes recur enough to name; the INDEX is the source of truth for what exists today.
 
 Patterns are structural moves, not templates. They name shapes that exist because coordination requires them. Composing multiple patterns creates a shape none of them have alone.
 
@@ -340,7 +340,7 @@ Always:
 |---------|-------|
 | YAML syntax, validation types, config structure, common pitfalls | `marianne:score-authoring` |
 | Running, monitoring, debugging, recovering jobs | `marianne:command` |
-| All 56 patterns by scale, with problems and signals | `scores/rosetta-corpus/INDEX.md` |
+| Full pattern catalog by scale, with problems and signals | `scores/rosetta-corpus/INDEX.md` |
 | Individual pattern shapes, stages, composition edges | `scores/rosetta-corpus/patterns/<name>.md` |
 | Forces → generators → patterns mapping | `scores/rosetta-corpus/forces.md` |
 | Problem type → pattern composition mapping | `scores/rosetta-corpus/selection-guide.md` |
