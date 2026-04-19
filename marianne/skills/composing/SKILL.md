@@ -148,7 +148,7 @@ Ask at least one question. Even when the goal seems clear, confirm your read. Fo
 
 ### Phase 3 — Design Gate
 
-Present the architecture before generating YAML. This is a turn boundary, not a mid-response ritual. You produce the design; you stop; the user responds; then — and only then — do you generate YAML. If you catch yourself writing design and YAML in the same response, you have collapsed the gate.
+Present the architecture before generating YAML. The gate is structural: the design must land as a reviewable artifact — and be reviewed — before any YAML is produced. In an interactive session that means a turn boundary: design, stop, wait for the user, then compose. In an orchestrated compose-system run it means a stage boundary: the design is written as a workspace artifact and a downstream stage (or the user) validates it before composition begins. Either way, if design and YAML collapse into the same response or the same stage, the gate is gone.
 
 Show:
 
