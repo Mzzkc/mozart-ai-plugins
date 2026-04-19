@@ -1,7 +1,7 @@
 ---
 name: codebase-analyzer
 description: |
-  Use this agent to analyze relevant parts of a codebase before composing a Mozart score that involves code changes. Returns architecture summary, relevant files, test strategy, and complexity assessment. Skip this agent for non-code goals (writing, research, planning). Examples: <example>Context: User wants a score that modifies code in a project. user: "/mozart:compose add pagination to the API" assistant: "Let me analyze the relevant code areas." <commentary>The goal involves code changes, so dispatch codebase-analyzer to understand what files, patterns, and tests are involved.</commentary></example>
+  Use this agent to analyze relevant parts of a codebase before composing a Marianne score that involves code changes. Returns architecture summary, relevant files, test strategy, and complexity assessment. Skip this agent for non-code goals (writing, research, planning). Examples: <example>Context: User wants a score that modifies code in a project. user: "/marianne:compose add pagination to the API" assistant: "Let me analyze the relevant code areas." <commentary>The goal involves code changes, so dispatch codebase-analyzer to understand what files, patterns, and tests are involved.</commentary></example>
 model: sonnet
 color: cyan
 ---

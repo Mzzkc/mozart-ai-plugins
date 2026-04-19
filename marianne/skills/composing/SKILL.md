@@ -1,6 +1,6 @@
 ---
 name: composing
-description: Use when the user wants to compose a Mozart score from a goal, turn an idea into a multi-stage AI workflow, or design orchestration YAML. Triggered by /mozart:compose or when the user describes work that would benefit from multi-stage, multi-agent orchestration.
+description: Use when the user wants to compose a Marianne score from a goal, turn an idea into a multi-stage AI workflow, or design orchestration YAML. Triggered by /marianne:compose or when the user describes work that would benefit from multi-stage, multi-agent orchestration.
 ---
 
 # Score Composition
@@ -11,9 +11,38 @@ Do not skim and compose from intuition. The force analysis, the pattern reading,
 
 Composition transforms a goal into a score — a program that orchestrates intelligences through coordinated work. The quality of your composition determines whether downstream agents succeed or fail. Every design decision affects work you will never see performed by agents you will never interact with.
 
-This skill teaches the act of composition itself. The score-authoring skill covers YAML syntax and mechanics. The usage skill covers running and debugging. This skill covers the cognitive process: understanding what to build, recognizing the forces that shape the solution, and designing a score whose structure faithfully serves the work.
+This skill teaches the act of composition itself. The score-authoring skill covers YAML syntax and mechanics. The command skill covers running and debugging. This skill covers the cognitive process: understanding what to build, recognizing the forces that shape the solution, and designing a score whose structure faithfully serves the work.
 
 Scores are general-purpose. Software, research, creative work, business operations, education — any domain where work can be decomposed into stages with validation. The domain shapes the content; the composition process is the same.
+
+---
+
+## Preflight — Mandatory Reads Before Phase 1
+
+**Stop. You cannot compose correctly without reading these files. In full. Now. Before anything else, including before asking the user clarifying questions.**
+
+Create a TodoWrite entry for each of the three pre-reads below. Mark each completed only after reading to end of file. Skimming does not count. Prior familiarity does not count — the corpus evolves, and the cost of re-reading is trivial compared to the cost of a composition that names patterns without implementing them.
+
+1. **`scores/rosetta-corpus/forces.md`** — the ten forces and their generators. Without this, force analysis is guessing.
+2. **`scores/rosetta-corpus/INDEX.md`** — all 56 patterns organized by scale, with problem statements and signals. Without this, pattern selection is recognition-driven rather than problem-driven.
+3. **`scores/rosetta-corpus/selection-guide.md`** — problem type → pattern composition mapping. This is the fastest path from user intent to candidate patterns.
+
+Then survey `examples/` — especially `examples/patterns/` — for proof scores whose shape resembles the user's goal. You will use these as structural reference, not as templates. **See Examples Discipline below.**
+
+After these reads are complete, proceed to Phase 1. Do not proceed with any pre-read incomplete.
+
+### Red Flags — Stop If You Catch Yourself Thinking These
+
+| Thought | What it really means |
+|---------|---------------------|
+| "I know these patterns already" | You know the names. Pattern files contain the shape. Read them. |
+| "I'll read the pattern file while I write YAML" | You'll skip it and rationalize after. Read first, write second. |
+| "This goal is simple, the corpus is overkill" | Not every goal needs named patterns — but you decide that AFTER reading forces.md, not before. |
+| "There's a perfect example I can adapt" | Examples are reference for shape, not templates to copy. See Examples Discipline. |
+| "The user is waiting, skipping reads saves time" | Exactly the pressure this gate resists. Read anyway. The user is waiting for a correct composition, not a fast bad one. |
+| "I read these last session" | You are a fresh agent. Prior reads don't transfer. Read now. |
+
+**Violating the letter of the preflight is violating the spirit of the skill.**
 
 ---
 
@@ -180,11 +209,14 @@ The selection guide at `scores/rosetta-corpus/selection-guide.md` organizes patt
 
 Active forces point to candidate patterns. For each candidate, **you must read the full pattern file** at `scores/rosetta-corpus/patterns/<name>.md`. Not a summary. Not from memory. The file itself. Pattern files contain the structural shape (stages, instrument guidance, DAG topology) that you need in the next step — without reading them, you cannot derive the score's structure and will produce a score that names the pattern without implementing it.
 
-After reading each pattern file:
+After reading each pattern file, extract to a composition worksheet at `{{ workspace }}/composition-worksheet.md`:
 
-1. **Check the signals.** Do they match your situation? Does the core dynamic address the forces you identified?
-2. **Check for a proof score** at `examples/patterns/` — not all patterns have them, but those that do (look for `proof_score:` in the pattern's frontmatter) are ground truth for how patterns become YAML.
-3. **Check `composes_with`** — natural compositions emerge from shared forces.
+1. **Pattern name** and verbatim `problem:` statement from the frontmatter.
+2. **Signals check.** Which signals from the file match your situation? If fewer than two match, this pattern is probably not the right choice.
+3. **Minimum stages.** Count the entries in the pattern's `stages:` frontmatter list. Record the number AND the stage names. This is the pattern's minimum structural shape — less than this is not an implementation of the pattern.
+4. **Instrument guidance per stage.** Copy the `instrument_guidance` field verbatim from each stage entry.
+5. **Composes with.** List the patterns from `composes_with` — these are candidates for the next selection round.
+6. **Proof score existence.** Check `proof_score:` in frontmatter; if present, read `examples/patterns/<proof_score>` as ground-truth YAML for this pattern.
 
 Before committing to a pattern:
 - Why this one and not an alternative that addresses the same forces?
@@ -219,6 +251,24 @@ Do not place a boundary where:
 - Work is naturally atomic
 - Splitting would lose necessary context
 - The boundary exists for symmetry, not for cognition
+
+### Structural Fidelity Check
+
+Before moving on, compare your composition against the patterns' minimum shapes. This check catches the most common failure mode: naming a pattern without implementing it.
+
+For each selected pattern, you recorded its minimum stage count during Select Patterns. Now compare:
+
+1. **Floor = sum of minimum stages across all selected patterns**, minus any justified merges. A "justified merge" is a specific pair of stages from two patterns that genuinely do the same work in your context, written out with one sentence of justification each. Unjustified aspiration is not a merge.
+2. **Actual = stage count in your composition** (including bookend stages like setup and consolidation).
+3. **Actual must be >= Floor.** If it isn't, you have removed structure the pattern requires. You are no longer implementing that pattern — you are decorating a simpler composition with its name. Either add the missing stages or drop the pattern from your claim.
+4. **Per-pattern check.** For each pattern, walk its `stages:` list and point to the stage in your composition that serves each role. If you cannot point to one, that structural role is absent.
+
+Write this check into `{{ workspace }}/composition-worksheet.md` as a table:
+
+| Pattern | Min stages | Stages covered in composition | Merges (justified) | Pass? |
+|---------|-----------|-------------------------------|--------------------|-------|
+
+Do not proceed to Select Instruments until every row is Pass.
 
 ### Select Instruments
 
@@ -257,6 +307,27 @@ Layer validations coarse to fine — existence first, structure second, behavior
 
 For fan-out, validate each instance independently. For synthesis stages, validate that the output reflects integration, not concatenation.
 
+### Examples Discipline
+
+You are instructed during preflight to survey `examples/` and `examples/patterns/` for proof scores that resemble the user's goal. This is reference work. It is not template work.
+
+**Rules:**
+
+1. **Extract shape, not substance.** From a matching example, note: the sequence of stages, how preludes and cadenzas are organized, how validations layer coarse-to-fine, how workspace paths are structured. Do not copy prompt text. Do not copy validation commands. Do not copy instrument assignments without verifying they fit THIS goal.
+2. **One example per goal is a warning sign.** If exactly one example maps to the goal and you are tempted to clone it, you have not done enough force analysis. Go back and find at least one other example that addresses one of your active forces differently. Use the contrast to sharpen your composition.
+3. **Compose bespoke.** The user's goal is specific. Their codebase is specific. Their instruments are specific. A template cannot know these things. Your composition can.
+
+**Rationalizations to refuse:**
+
+| Thought | Reality |
+|---------|--------|
+| "There's a score that already does 90% of this" | Then there are 10% that make it wrong for this goal. That 10% is where composition lives. |
+| "Copying is faster and the user won't notice" | The user will notice when validations pass on irrelevant criteria and downstream work is corrupted. |
+| "I'll copy and adapt" | "Adapt" here means "leave the bits I didn't think about alone." Those bits fail. Start from structural derivation, use the example as a cross-check. |
+| "The example is a proof score — it's authoritative" | Proof scores prove the pattern works, for the specific case they were written for. Authority for YOUR goal comes from YOUR force analysis. |
+
+Name the examples you consulted in `{{ workspace }}/composition-worksheet.md`, with one sentence per example on what shape you borrowed and one sentence on why the rest doesn't fit this goal.
+
 ### Self-Review
 
 Before finalizing, step back from the pattern analysis and ask: **does this score still serve the user's actual goal?** It is possible to compose a structurally perfect score for the wrong problem. The patterns are a vocabulary, not a destination — the destination is the user's intent.
@@ -270,6 +341,7 @@ Then attack every sheet:
 - For fan-out: is `parallel.enabled: true` set? Are dependencies correct?
 - Does `mzt validate` pass?
 - For concerts: do all `job_path` values use absolute paths? Is `fresh: true` set for self-chaining?
+- **Did the structural fidelity check pass for every selected pattern?** If the worksheet table has any row that isn't Pass, the score claims a pattern it does not implement.
 
 ---
 
@@ -292,8 +364,8 @@ Then attack every sheet:
 
 | Purpose | Where |
 |---------|-------|
-| YAML syntax, validation types, config structure, common pitfalls | Invoke `mozart:score-authoring` |
-| Running, monitoring, debugging, recovering jobs | Invoke `mozart:usage` |
+| YAML syntax, validation types, config structure, common pitfalls | Invoke `marianne:score-authoring` |
+| Running, monitoring, debugging, recovering jobs | Invoke `marianne:command` |
 | All 56 patterns by scale, with problems and signals | `scores/rosetta-corpus/INDEX.md` |
 | Individual pattern shapes, stages, composition edges | `scores/rosetta-corpus/patterns/<name>.md` |
 | Forces → generators → patterns mapping | `scores/rosetta-corpus/forces.md` |
