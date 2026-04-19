@@ -5,66 +5,88 @@ description: Use when the user wants to compose a Marianne score from a goal, tu
 
 # Score Composition
 
-**This skill is your complete composition methodology. It replaces any general-purpose brainstorming or planning workflow for this task.** Do not invoke brainstorming, writing-plans, or other process skills — this skill contains its own workflow with phases specifically designed for score composition. Following a generic process produces generic scores. Following this process produces scores with structural fidelity.
+Composition turns a goal into a score — a program that coordinates intelligences through staged work. You are the composer. The score is played by agents you will never meet on work you will never see. Every structural choice you make now shapes whether that work succeeds.
 
-Do not skim and compose from intuition. The force analysis, the pattern reading, the structural derivation, the injection design — each step exists because skipping it produces scores that name patterns without implementing them. Read the full skill before composing. Refer back to it during composition.
+This skill covers the cognitive work of composition: understanding the goal, recognizing the forces at play, and arranging stages so the structure serves the work. The score-authoring skill covers YAML syntax. The command skill covers execution. This skill is about the shape between them.
 
-Composition transforms a goal into a score — a program that orchestrates intelligences through coordinated work. The quality of your composition determines whether downstream agents succeed or fail. Every design decision affects work you will never see performed by agents you will never interact with.
-
-This skill teaches the act of composition itself. The score-authoring skill covers YAML syntax and mechanics. The command skill covers running and debugging. This skill covers the cognitive process: understanding what to build, recognizing the forces that shape the solution, and designing a score whose structure faithfully serves the work.
-
-Scores are general-purpose. Software, research, creative work, business operations, education — any domain where work can be decomposed into stages with validation. The domain shapes the content; the composition process is the same.
+Scope: **Marianne orchestration.** The concrete apparatus — instruments, validation types, workspace safety, `mzt` commands — assumes Marianne. The methodology (forces, decomposition, pattern composition) transfers elsewhere; the apparatus does not. If a user asks for composition outside Marianne, say so and adapt.
 
 ---
 
-## Preflight — Mandatory Reads Before Phase 1
+## Preflight
 
-**Stop. You cannot compose correctly without reading these files. In full. Now. Before anything else, including before asking the user clarifying questions.**
+Composition needs corpus vocabulary in working memory. But dumping the whole corpus upfront buries the user's goal under abstract theory. Read in tiers, tied to when you actually need each file.
 
-Create a TodoWrite entry for each of the three pre-reads below. Mark each completed only after reading to end of file. Skimming does not count. Prior familiarity does not count — the corpus evolves, and the cost of re-reading is trivial compared to the cost of a composition that names patterns without implementing them.
+**Tier 1 — before you analyze forces:**
 
-1. **`scores/rosetta-corpus/forces.md`** — the ten forces and their generators. Without this, force analysis is guessing.
-2. **`scores/rosetta-corpus/INDEX.md`** — all 56 patterns organized by scale, with problem statements and signals. Without this, pattern selection is recognition-driven rather than problem-driven.
-3. **`scores/rosetta-corpus/selection-guide.md`** — problem type → pattern composition mapping. This is the fastest path from user intent to candidate patterns.
+1. `scores/rosetta-corpus/INDEX.md` — all 56 patterns, by scale, with problems and signals.
+2. `scores/rosetta-corpus/forces.md` — the ten forces and their generators.
 
-Then survey `examples/` — especially `examples/patterns/` — for proof scores whose shape resembles the user's goal. You will use these as structural reference, not as templates. **See Examples Discipline below.**
+**Tier 2 — just-in-time, as you select patterns:**
 
-After these reads are complete, proceed to Phase 1. Do not proceed with any pre-read incomplete.
+3. `scores/rosetta-corpus/selection-guide.md` — the section matching your problem type.
+4. `scores/rosetta-corpus/patterns/<name>.md` — the full file for each candidate pattern. Not a summary. Not from memory. The file itself. Pattern files carry the shape you are about to implement.
 
-### Red Flags — Stop If You Catch Yourself Thinking These
+**Tier 3 — on demand:**
 
-| Thought | What it really means |
-|---------|---------------------|
-| "I know these patterns already" | You know the names. Pattern files contain the shape. Read them. |
-| "I'll read the pattern file while I write YAML" | You'll skip it and rationalize after. Read first, write second. |
-| "This goal is simple, the corpus is overkill" | Not every goal needs named patterns — but you decide that AFTER reading forces.md, not before. |
-| "There's a perfect example I can adapt" | Examples are reference for shape, not templates to copy. See Examples Discipline. |
-| "The user is waiting, skipping reads saves time" | Exactly the pressure this gate resists. Read anyway. The user is waiting for a correct composition, not a fast bad one. |
-| "I read these last session" | You are a fresh agent. Prior reads don't transfer. Read now. |
+- `examples/` and `examples/patterns/` — proof scores, as reference for shape.
+- `scores/rosetta-corpus/glossary.md` — when terminology is unclear.
 
-**Violating the letter of the preflight is violating the spirit of the skill.**
+Tiered reading is not permission to skip. What it buys is **attention preservation**: the user's goal stays fresh through the moment of composition. Pattern files must be read before you claim their patterns; that is the one rule here worth being rigid about, because the rest of this skill assumes you have the shape in hand.
 
 ---
 
 ## Principle Zero
 
-The user is the authority. You propose; they decide. Present your reasoning, offer alternatives, get approval before generating YAML.
+The user is the authority. You propose; they decide. Present reasoning, offer alternatives, get approval before generating YAML.
+
+---
+
+## Phase 0 — Decide Whether to Compose
+
+Not every request warrants a score. Orchestration machinery pays for itself when there is real coordination; when there isn't, it's pure overhead. Answer this before anything else.
+
+A score is the right tool when **two or more** apply:
+
+- The work decomposes into distinct stages with different artifacts or capabilities.
+- Independent units benefit from parallel execution — fan-out over files, sources, perspectives.
+- Different stages want different instruments.
+- Validation between stages matters — contamination downstream costs more than catching it here.
+- The work is long-running, retryable, or needs recovery.
+- The score will be run again, by someone else, or in different contexts.
+
+A score is **not** the right tool when:
+
+- The user wants a single piece of output one good prompt could produce.
+- The user wants one command run with reasoning — that's a CLI invocation.
+- The user is exploring and premature structure would freeze the wrong shape.
+- The user has the answer and just needs it typed out.
+- The score's overhead exceeds the work itself.
+
+**At Phase 0:**
+
+1. Say in one sentence what the user wants.
+2. Say in one sentence what serves it — a score, a prompt, a command, a conversation.
+3. If it's not a score, say so and recommend the simpler path. If the user wants help with the simpler path, help them with it directly — don't abandon them to navigate without you. If they want the score anyway, they get to overrule you; note the concern and proceed.
+4. If it is a score, name the criteria that apply, then continue.
+
+Over-composition is a failure mode of this skill. Under-composition is a failure mode of neglect. The gate sits between them.
 
 ---
 
 ## Vocabulary
 
-A **score** is a YAML configuration that declares what work to do, which instruments to use, how to validate outcomes, and how to recover from failures.
+A **score** is a YAML configuration declaring what work to do, which instruments to use, how to validate, and how to recover.
 
-A **sheet** is one agent performing one task — the atomic unit of execution. A **stage** is a logical phase that may expand into multiple sheets via **fan-out** — parallel instances of the same work on different data using the same instrument. If instances need different instruments, they are separate stages, not fan-out. In YAML, stages are declared via `movements:` (with per-movement names and instrument assignments) and `sheet.total_items` (the pre-expansion stage count). The `stage` template variable gives each sheet its logical phase number.
+A **sheet** is one agent performing one task — the atomic unit of execution. A **stage** is a logical phase that may fan out into multiple sheets — parallel instances of the same work on different data with the same instrument. If instances need different instruments, they are separate stages, not fan-out. In YAML, stages are declared via `movements:` and `sheet.total_items`; the `stage` template variable gives each sheet its phase number.
 
-An **instrument** is an AI backend or CLI tool with specific capabilities and cost profile. Run `mzt instruments list` to see what's available.
+An **instrument** is an AI backend or CLI tool with specific capabilities and cost profile. `mzt instruments list` shows what's registered.
 
-**Preludes** inject shared context into every sheet. **Cadenzas** inject per-sheet context. Both guarantee the agent has what it needs — telling an agent to "read a file" is unreliable.
+**Preludes** inject shared context into every sheet. **Cadenzas** inject per-sheet context. Injection is how you give an agent what it needs. Telling an agent to "read a file" is unreliable; injecting the file is not.
 
-A **concert** chains multiple scores via on_success hooks. The **workspace** is where all artifacts live — the score's shared memory. The **conductor** is the daemon that manages execution.
+A **concert** chains scores via `on_success`. The **workspace** is shared memory between sheets. The **conductor** is the daemon.
 
-The musical vocabulary is load-bearing. Scores, sheets, movements, voices, instruments, preludes, cadenzas, concerts, conductors — these name architectural concepts, not decorations. When the naming feels wrong, the architecture may be wrong.
+The musical vocabulary is load-bearing, not decoration. When a name feels forced, the architecture may be wrong.
 
 ### Forces
 
@@ -76,287 +98,239 @@ Every coordination problem has a force profile. Forces drive pattern selection.
 | **Finite Resources** | Does the work exceed what one agent can handle well? |
 | **Partial Failure** | Can components fail independently? |
 | **Exponential Defect Cost** | Do problems found late cost more than problems found early? |
-| **Producer-Consumer Mismatch** | Do stages produce in formats the next stage can't directly consume? |
+| **Producer-Consumer Mismatch** | Do stages produce in formats the next can't directly consume? |
 | **Instrument-Task Fit** | Do different tasks need fundamentally different capabilities? |
 | **Convergence Imperative** | Does iterative work need domain-specific stopping criteria? |
 | **Accumulated Signal** | Must evidence build to a threshold before triggering change? |
 | **Structured Disagreement** | Are single perspectives unreliable for this problem? |
 | **Progressive Commitment** | Is full commitment before validation risky? |
 
-The forces reference at `scores/rosetta-corpus/forces.md` maps forces to generators and generators to patterns.
+`scores/rosetta-corpus/forces.md` maps forces to generators and generators to patterns.
 
 ### The Rosetta Corpus
 
-The corpus at `scores/rosetta-corpus/` contains 56 coordination patterns organized by scale — within-stage (prompt structure), score-level (sheet arrangement), concert-level (multi-score coordination), and cross-cutting categories (adaptation, instrument-strategy, iteration, communication).
+The corpus contains 56 coordination patterns organized by scale — within-stage, score-level, concert-level, and cross-cutting. Each pattern file carries: problem, signals, forces, generators, stages (the shape), composes-with, core dynamic, failure mode, and a YAML sketch.
 
-**Before using a pattern, read its file.** Each file at `scores/rosetta-corpus/patterns/<name>.md` contains:
+Patterns are structural moves, not templates. They name shapes that exist because coordination requires them. Composing multiple patterns creates a shape none of them have alone.
 
-- **Problem** and **Signals** — when to reach for this pattern
-- **Forces** and **Generators** — what structural properties produce it
-- **Stages** — the shape: how many stages, what each does, what instrument capability serves each
-- **Composes With** — other patterns this naturally combines with
-- **Core Dynamic** — the mechanism, not just the name
-- **Failure Mode** — how this pattern breaks
-- **Marianne Score Structure** — a YAML snippet showing the shape
-
-The INDEX at `scores/rosetta-corpus/INDEX.md` shows all patterns with their problems and signals. Pattern filenames are kebab-case versions of the display name (e.g., "Fan-out + Synthesis" → `fan-out-synthesis.md`, "Commissioning Cascade" → `commissioning-cascade.md`). The selection guide at `scores/rosetta-corpus/selection-guide.md` maps problem types to pattern compositions. The glossary at `scores/rosetta-corpus/glossary.md` defines all terms.
-
-Patterns are structural moves, not templates. They describe coordination shapes that exist because coordination requires them. When you compose multiple patterns, you create a shape none of them have individually.
+**The corpus is reference, not scripture.** It captures recurring shapes observed to date, not all valid shapes. When honest force analysis finds no pattern matching more than a signal or two, composing from first principles is not a fallback — it's the right move. See *Select Patterns* below.
 
 ---
 
 ## The Workflow
 
 ```
-UNDERSTAND → QUESTION → DESIGN GATE → COMPOSE → REVIEW → OFFER
+DECIDE → UNDERSTAND → QUESTION → DESIGN GATE → COMPOSE → REVIEW → OFFER
 ```
 
-### Phase 1: Understand
+Phase 0 is above. The rest assume composition is right.
 
-Study the user's goal:
-- What did they say they want?
+### Phase 1 — Understand
+
+Study the goal:
+
+- What did the user say they want?
 - What do they probably need but didn't articulate?
 - What would make the output wrong?
 
-**Offer to investigate the project** before designing. Investigation produces better scores — conventions discovered now prevent validation failures later. But the user may already have the context you need, or the goal may not require project-specific knowledge.
+**Offer to investigate the project** before designing. Conventions discovered now prevent validation failures later. The user may already have the context, or the goal may not need project-specific knowledge.
 
-If the user wants investigation, two areas matter:
+Two investigation dimensions matter:
 
-1. **Venue context** — project structure, spec corpus (`.marianne/spec/`), conventions from project docs, available instruments. Produces a venue profile that informs composition.
+1. **Venue context** — structure, spec corpus at `.marianne/spec/`, project docs, available instruments.
+2. **Codebase analysis** (code goals only) — relevant files, test commands, build/lint commands, integration points.
 
-2. **Codebase analysis** (for code goals only) — relevant files, test infrastructure, build/lint/type-check commands, integration points, complexity assessment. Skip for non-code goals.
+If your platform supports subagents, `venue-explorer` and `codebase-analyzer` run these in parallel. If not, do it yourself.
 
-If your platform supports dispatching subagents, run both investigations in parallel for speed. The `venue-explorer` and `codebase-analyzer` agents in this plugin are designed for this. If subagents aren't available, do the investigation yourself — read the project docs, check the directory structure, find the test commands. The work is the same either way.
+### Phase 2 — Question
 
-When investigation completes, extract conventions the score must respect, constraints that affect design, and (for code goals) specific files, test commands, and integration points.
+Ask at least one question. Even when the goal seems clear, confirm your read. Focus on what the user hasn't considered — missing validation strategies, unclear decomposition, unstated constraints. One question per message, multiple choice where possible. Skip only if explicitly told to.
 
-### Phase 2: Question
+### Phase 3 — Design Gate
 
-Ask at least one question. Even when the goal seems clear, confirm your understanding. Questions that reveal misalignment save more time than they cost.
+Present the architecture before generating YAML. This is a turn boundary, not a mid-response ritual. You produce the design; you stop; the user responds; then — and only then — do you generate YAML. If you catch yourself writing design and YAML in the same response, you have collapsed the gate.
 
-Focus on what the user hasn't considered — missing validation strategies, incomplete decomposition, unstated constraints. Cover their gaps.
+Show:
 
-Skip only if the user explicitly asks you to. Prefer multiple choice. One question per message.
+- The forces you identified and why they are active.
+- The pattern(s) you selected (or that no pattern fit, and the structure was derived from first principles — name the forces that shaped it).
+- How stages decompose: roughly what each does, what depends on what.
+- Which instruments serve each stage.
+- Where the workspace lives.
+- How validations prove the outcome.
 
-### Phase 3: Design Gate
+Concise for straightforward compositions, fuller for complex ones. Wait for approval.
 
-Present the score architecture before generating YAML. This is non-negotiable.
+### Phase 4 — Compose
 
-Show your reasoning: what forces you identified, which patterns address them, how the stages decompose, what instruments serve each stage, what workspace you'll use, and how validations prove outcomes.
+Generate the YAML. Before writing, load the score-authoring reference — invoke `marianne:score-authoring` or read the tiered docs in this plugin's `docs/ref/`:
 
-For straightforward compositions, a concise summary suffices. For complex ones, show the full stage breakdown with reasoning.
+- `essentials.md` — syntax, validation types, config, common pitfalls.
+- `patterns.md` — fan-out, multi-stage, Jinja, prompt engineering.
+- `advanced.md` — concerts, self-chaining, isolation, stale detection.
 
-Wait for approval before proceeding.
+### Phase 5 — Review
 
-### Phase 4: Compose
+Review adversarially. Dispatch `score-reviewer` if available, or review yourself assuming the score is wrong until proven otherwise. Check workspace safety, YAML correctness, validation quality, first-run safety. Fix critical and important issues before presenting.
 
-Generate the score YAML. This phase applies the composition methodology — see the next section.
+### Phase 6 — Offer
 
-Before writing YAML, load the score-authoring reference. Invoke the `score-authoring` skill, or read the tiered reference docs directly:
-- `essentials.md` — needed for all scores (syntax, validations, config, pitfalls)
-- `patterns.md` — for fan-out, multi-stage design, Jinja, prompt engineering
-- `advanced.md` — for concerts, self-chaining, isolation, stale detection
+Present the score. Show where it saves, what it does, what the review caught. If the conductor is running, offer to submit it. If not, show the run command.
 
-These live in this plugin's `docs/ref/` directory.
+Save location by context:
 
-### Phase 5: Review
-
-Have the score reviewed adversarially — dispatch `score-reviewer` if available, or review it yourself with an adversarial stance: assume the score has problems until proven otherwise. Check workspace safety, syntax correctness, validation quality, and first-run safety.
-
-Fix all critical and important issues before presenting to the user.
-
-### Phase 6: Offer
-
-Present the score. Show where it will be saved, what it does when run, and any caveats from the review.
-
-If the conductor is running, offer to submit it. If not, show the run command.
-
-**Save location** — infer from context:
-- Scores for ongoing development → `scores-internal/`
-- Scores that are part of project operations → `scores/`
-- Example scores for documentation → `examples/`
-- If unclear, ask the user
+- Ongoing development → `scores-internal/`
+- Project operations → `scores/`
+- Documentation examples → `examples/`
+- Unclear → ask.
 
 ---
 
 ## The Composition Methodology
 
-This is the heart of Phase 4. It describes how to move from an approved design to a correct score.
+This is the heart of Phase 4: how to move from approved design to correct score.
 
-Composition is judgment, not procedure. The steps below give structure to that judgment, but the order is not rigid — decomposition might reveal wrong pattern selection, force analysis might change your understanding of the goal. Move fluidly. The goal is a score that serves the user's intent, not a score that satisfies a checklist.
+Composition is judgment. The steps below structure that judgment; they are not a rigid order. Decomposition can reveal wrong pattern selection. Force analysis can reframe the goal. Move fluidly.
 
 ### Define the Work
 
 Before touching patterns or YAML:
 
-- What is the input? What data, files, or state does the work start from?
-- What is the output? What must exist when the score completes?
-- What are the units of work? Can they be processed independently?
-- What makes output wrong? What does failure look like? What distinguishes output that is merely done from output that is done well?
-- What varies across units? Do some require different treatment?
-- What must be shared? Do agents need common context or standards?
-- What depends on what? Which work must complete before other work begins?
+- What is the input — data, files, state?
+- What is the output — what must exist when the score completes?
+- What are the units of work? Can they run independently?
+- What makes output wrong? What distinguishes done from done well?
+- What varies across units? What must be shared?
+- What depends on what?
 
 These answers determine everything that follows.
 
 ### Analyze Forces
 
-For each of the 10 forces in the table above, ask whether it's active in your problem. Note what evidence makes each force active or inactive. This evidence grounds your pattern selection — without it, pattern choice is name recognition.
+Walk the ten forces. For each, is it active here? Note the evidence — a sentence or two on what makes it active or not. Evidence grounds pattern selection. Without it, pattern choice collapses into name recognition.
 
-The selection guide at `scores/rosetta-corpus/selection-guide.md` organizes patterns by problem type and recommends compositions. Start there when the force profile matches a known problem type.
+`scores/rosetta-corpus/selection-guide.md` organizes patterns by problem type. Start there when the force profile matches a known problem type.
 
 ### Select Patterns
 
-Active forces point to candidate patterns. For each candidate, **you must read the full pattern file** at `scores/rosetta-corpus/patterns/<name>.md`. Not a summary. Not from memory. The file itself. Pattern files contain the structural shape (stages, instrument guidance, DAG topology) that you need in the next step — without reading them, you cannot derive the score's structure and will produce a score that names the pattern without implementing it.
+Active forces point to candidate patterns. **For each candidate, read the pattern file** at `scores/rosetta-corpus/patterns/<name>.md`. Not a summary. Not from memory. The file itself. Pattern files carry the structural shape — stages, instrument guidance, dependency topology — that you need in the next step. Without the file open, you cannot derive structure; you can only name the pattern.
 
-After reading each pattern file, extract to a composition worksheet at `{{ workspace }}/composition-worksheet.md`:
+For each candidate, hold in mind:
 
-1. **Pattern name** and verbatim `problem:` statement from the frontmatter.
-2. **Signals check.** Which signals from the file match your situation? If fewer than two match, this pattern is probably not the right choice.
-3. **Minimum stages.** Count the entries in the pattern's `stages:` frontmatter list. Record the number AND the stage names. This is the pattern's minimum structural shape — less than this is not an implementation of the pattern.
-4. **Instrument guidance per stage.** Copy the `instrument_guidance` field verbatim from each stage entry.
-5. **Composes with.** List the patterns from `composes_with` — these are candidates for the next selection round.
-6. **Proof score existence.** Check `proof_score:` in frontmatter; if present, read `examples/patterns/<proof_score>` as ground-truth YAML for this pattern.
+- The pattern's `problem` statement and how well it matches yours.
+- Which signals match (two or more suggests fit; fewer suggests forcing).
+- The minimum stage list and what each stage does.
+- The instrument guidance per stage.
+- The `composes_with` list — next-round candidates.
+- The `Failure Mode` section — this is how the pattern breaks when structure is degraded.
 
-Before committing to a pattern:
-- Why this one and not an alternative that addresses the same forces?
+Before committing:
+
+- Why this pattern and not an alternative addressing the same forces?
 - If composing: what structural property does the composition create that neither pattern has alone?
 - Could any pattern be removed without losing a necessary property?
-- Could the problem be served by a simpler approach with no named pattern at all? Not every problem needs orchestration patterns — sometimes sequential stages with good validations are the right answer.
+- Could the problem be served by sequential stages with good validations and no named pattern at all?
+
+**When no pattern fits**, compose from first principles. This is a peer path, not a fallback:
+
+1. Derive stages from the work's dependency graph — what inputs, what outputs, what must precede what.
+2. Use the forces framework to justify each boundary — why one stage ends here and the next begins there.
+3. At the Design Gate, tell the user explicitly: "No Rosetta pattern matched; I derived the structure from forces and dependencies." Name the forces you applied.
+4. Append one line to `docs/technique-ideas.md` describing the shape and why existing patterns didn't cover it. Novel shapes are how the corpus grows.
+
+First-principles composition is the same work as pattern composition with a different input. You still derive stages, place boundaries, select instruments, design injections and validations. What you give up is the vocabulary that lets you borrow structural commitments from prior art. What you gain is fit.
 
 ### Derive the Structure
 
-Each selected pattern has a `stages:` field describing its structural shape. Read it. For each pattern in your composition, extract a table:
+Walk each selected pattern's `stages:` field. For each, know the purpose, the instrument capability, and the dependencies. Compose: sometimes patterns chain sequentially (one's output feeds the next), sometimes they nest (one's single stage expands into another's full shape), sometimes they run in parallel with a convergence point.
 
-| Stage | Purpose | Instrument Guidance | Depends On |
-|-------|---------|---------------------|------------|
+Patterns have *core* stages — the distinctive cognitive work — and *bookend* stages like setup, ingestion, and consolidation that naturally overlap across patterns. Bookends can merge when a single stage genuinely serves both patterns. A merge is honest when the merged stage carries every validation from both source stages, every dependency from both source stages, operates on the same artifact, and uses an instrument capable of both stages' work. A merge that drops a validation, decouples a dependency, or collapses distinct artifacts isn't a merge; it is removing structure. If you can't explain what each pattern's core stages are doing in your composition, the pattern is not implemented.
 
-Most patterns need bookend stages beyond their core shape — setup before and consolidation after. A pattern with 4 core stages typically becomes 5-6 stages in a score. The proof scores in `examples/patterns/` show this expansion concretely.
+Place a stage boundary where:
 
-The score's full stage list is the composition of these tables. When patterns compose, their stages interleave or sequence depending on the relationship:
-- **Sequential**: One pattern's output feeds the next pattern's input. Stages chain end-to-end.
-- **Nested**: One pattern's stage contains another pattern's full shape. The inner pattern replaces what would be a single stage.
-- **Parallel**: Patterns operate on independent aspects simultaneously. Stages run concurrently with a shared convergence point.
+- The output format changes.
+- The instrument should change.
+- Work must be verified before it feeds downstream.
+- Parallelism begins or ends.
+- Context would exceed useful limits.
 
-Some boundaries can merge when a single stage genuinely serves both patterns' purposes — but each merge is a claim that the separation adds no value. Verify before merging.
+Don't place a boundary where:
 
-Place a boundary where:
-- The output format changes
-- The instrument should change
-- Work should be verified before it feeds downstream — errors caught here are cheap; errors caught three stages later are expensive
-- Parallelism begins or ends
-- Context would exceed useful limits
-
-Do not place a boundary where:
-- Work is naturally atomic
-- Splitting would lose necessary context
-- The boundary exists for symmetry, not for cognition
-
-### Structural Fidelity Check
-
-Before moving on, compare your composition against the patterns' minimum shapes. This check catches the most common failure mode: naming a pattern without implementing it.
-
-For each selected pattern, you recorded its minimum stage count during Select Patterns. Now compare:
-
-1. **Floor = sum of minimum stages across all selected patterns**, minus any justified merges. A "justified merge" is a specific pair of stages from two patterns that genuinely do the same work in your context, written out with one sentence of justification each. Unjustified aspiration is not a merge.
-2. **Actual = stage count in your composition** (including bookend stages like setup and consolidation).
-3. **Actual must be >= Floor.** If it isn't, you have removed structure the pattern requires. You are no longer implementing that pattern — you are decorating a simpler composition with its name. Either add the missing stages or drop the pattern from your claim.
-4. **Per-pattern check.** For each pattern, walk its `stages:` list and point to the stage in your composition that serves each role. If you cannot point to one, that structural role is absent.
-
-Write this check into `{{ workspace }}/composition-worksheet.md` as a table:
-
-| Pattern | Min stages | Stages covered in composition | Merges (justified) | Pass? |
-|---------|-----------|-------------------------------|--------------------|-------|
-
-Do not proceed to Select Instruments until every row is Pass.
+- Work is naturally atomic.
+- Splitting would lose necessary context.
+- The boundary is symmetric, not cognitive.
 
 ### Select Instruments
 
-Different instruments, and different models within those instruments, were built for specific purposes. A large-context model excels at reading and synthesis. A fast model excels at mechanical tasks. A reasoning model excels at design and analysis. A CLI tool excels at deterministic operations. The goal is to match each sheet to the instrument whose purpose fits the work, with deep fallback chains so the score completes even when the preferred instrument is unavailable.
+Different instruments — and different models within them — were built for different work. A large-context model excels at reading and synthesis. A fast model excels at mechanical tasks. A reasoning model excels at design. A CLI tool excels at deterministic operations. Match each sheet to the instrument whose purpose fits the work.
 
-Each pattern's stages include instrument guidance. Use it as a starting point, then consider:
+Starting from each pattern's instrument guidance, ask:
 
-- What capability does each stage actually require? Reasoning depth, context window size, tool access, speed — match the instrument to what the stage actually needs.
-- Where is verification needed? Use a different model family for verification than for production — correlated models share blind spots.
-- Which stages are bottlenecks — where failure wastes the most downstream work? Use the strongest available instrument there.
-- Is any work deterministic? Tests, linting, structural comparison, file moves — these are CLI commands, not AI tasks.
-- Every instrument assignment should have fallbacks (`instrument_fallbacks:`) so that rate limits or outages don't halt the score. The fallback chain should degrade gracefully — strong model → capable model → any model that can complete the work.
+- What capability does this stage actually require — reasoning depth, context window, tool access, speed?
+- Where is verification needed? Verification by a different model family than production — correlated models share blind spots.
+- Where are the bottlenecks, where failure wastes the most downstream work? Strongest instrument there.
+- Is any work deterministic? That's a CLI, not an AI.
+
+Every assignment needs a fallback chain (`instrument_fallbacks:`) so rate limits or outages don't halt the score. Degrade gracefully: strong → capable → any that can complete the work.
+
+**Verify availability.** `mzt instruments list` shows what is registered on this conductor. A score referencing an unregistered instrument fails at runtime, not at `mzt validate`. Prefer instruments you verified over instruments you remembered.
 
 ### Design Injections
 
-Every score should use preludes and cadenzas. If an agent needs content to do its work, inject it — do not tell agents to "read this file." Telling is unreliable. Injection guarantees they receive it.
+Every score should use preludes and cadenzas. If an agent needs content to do its work, inject it — don't tell agents to "read this file." Telling is unreliable; injection is not.
 
-- **Preludes** — shared context injected into EVERY sheet. Conventions, standards, the spec document, glossary, anything all agents must know. A score without preludes leaves each agent to discover context independently — they will discover it differently, or not at all.
-- **Cadenzas** — per-sheet context injected into SPECIFIC sheets. The particular pattern file for this stage, the upstream output to review, per-instance data for fan-out specialization. Cadenzas are how you give each agent exactly the context their stage requires.
+- **Preludes** — shared context for every sheet. Conventions, standards, the spec passage, the glossary. A score without preludes leaves each agent to find context independently; they will find it differently, or not at all.
+- **Cadenzas** — per-sheet context for specific sheets. The pattern file for this stage, the upstream output to review, the per-instance data for fan-out specialization.
 
-A well-composed score uses both. Preludes establish the shared substrate. Cadenzas specialize each stage.
+Preludes establish the substrate. Cadenzas specialize each stage.
 
 ### Design Validations
 
 Three questions, in order:
 
-1. **"Can the agent pass all my validations without achieving this goal?"** If yes, the validations are decorative. Add one that directly proves the goal was achieved.
+1. **Can the agent pass all my validations without achieving this goal?** If yes, the validations are decorative. Add one that proves the goal.
+2. **If the work is done but done poorly, do my validations catch that?** Completion and quality are different. A file can exist and contain nothing useful. Code can pass tests and be unmaintainable. Distinguish adequate from inadequate, not just present from absent.
+3. **When a stage produces bad output, what happens?** If the answer is "it flows downstream and contaminates everything after it," the score has a structural gap. Catching problems early is itself work that belongs in the structure.
 
-2. **"If the work is done but done poorly, do my validations catch that?"** Completion and quality are different things. A file can exist but contain nothing useful. Code can pass tests but be unmaintainable. An analysis can have the right sections but draw no actual conclusions. Design validations that distinguish adequate from inadequate, not just present from absent.
+Validations prove outcomes, not process. Layer coarse to fine — existence first, structure second, behavior third. Skip fine checks when coarse checks fail.
 
-3. **"When a stage produces output that isn't good enough, what happens?"** If the answer is "nothing — it flows downstream and contaminates everything after it," the score has a structural gap. The work of catching problems early and addressing them before they cascade is itself work that belongs in the score's structure.
+For fan-out, validate each instance independently. For synthesis stages, validate the output reflects integration, not concatenation.
 
-Validations prove outcomes, not process. A file existing proves only that a file was created. Tests passing proves behavior. Structural markers prove the deliverable has the shape the prompt asked for.
-
-Layer validations coarse to fine — existence first, structure second, behavior third. If a coarse check fails, skip the fine checks.
-
-For fan-out, validate each instance independently. For synthesis stages, validate that the output reflects integration, not concatenation.
-
-### Examples Discipline
-
-You are instructed during preflight to survey `examples/` and `examples/patterns/` for proof scores that resemble the user's goal. This is reference work. It is not template work.
-
-**Rules:**
-
-1. **Extract shape, not substance.** From a matching example, note: the sequence of stages, how preludes and cadenzas are organized, how validations layer coarse-to-fine, how workspace paths are structured. Do not copy prompt text. Do not copy validation commands. Do not copy instrument assignments without verifying they fit THIS goal.
-2. **One example per goal is a warning sign.** If exactly one example maps to the goal and you are tempted to clone it, you have not done enough force analysis. Go back and find at least one other example that addresses one of your active forces differently. Use the contrast to sharpen your composition.
-3. **Compose bespoke.** The user's goal is specific. Their codebase is specific. Their instruments are specific. A template cannot know these things. Your composition can.
-
-**Rationalizations to refuse:**
-
-| Thought | Reality |
-|---------|--------|
-| "There's a score that already does 90% of this" | Then there are 10% that make it wrong for this goal. That 10% is where composition lives. |
-| "Copying is faster and the user won't notice" | The user will notice when validations pass on irrelevant criteria and downstream work is corrupted. |
-| "I'll copy and adapt" | "Adapt" here means "leave the bits I didn't think about alone." Those bits fail. Start from structural derivation, use the example as a cross-check. |
-| "The example is a proof score — it's authoritative" | Proof scores prove the pattern works, for the specific case they were written for. Authority for YOUR goal comes from YOUR force analysis. |
-
-Name the examples you consulted in `{{ workspace }}/composition-worksheet.md`, with one sentence per example on what shape you borrowed and one sentence on why the rest doesn't fit this goal.
+**Negative-test your validations.** Ask: if the agent wrote an empty file, a one-line placeholder, or a refusal, would this validation catch it? Every markdown artifact stage should have a word-count or structural-marker check alongside `file_exists` — `file_exists` alone is the most common decorative validation.
 
 ### Self-Review
 
-Before finalizing, step back from the pattern analysis and ask: **does this score still serve the user's actual goal?** It is possible to compose a structurally perfect score for the wrong problem. The patterns are a vocabulary, not a destination — the destination is the user's intent.
+Step back from the structural work and ask: **does this score still serve the user's goal?** Structural perfection for the wrong problem is still wrong. The patterns are vocabulary; the destination is intent.
 
-Then attack every sheet:
+Then, with that alignment held, consider each stage:
 
-- Can this instrument complete this work with quality? If the answer is "probably," decompose further or strengthen the instrument.
+- Can this instrument do this work with quality? If "probably," decompose further or strengthen the instrument.
 - Is every required input injected, not just referenced?
-- Can an agent pass all validations without doing the actual work?
-- Are dependencies declared for all stages that need them?
-- For fan-out: is `parallel.enabled: true` set? Are dependencies correct?
+- Can the agent pass validations without doing the work?
+- Are dependencies declared for everything that needs them?
+- For fan-out: `parallel.enabled: true`? Dependencies right?
 - Does `mzt validate` pass?
-- For concerts: do all `job_path` values use absolute paths? Is `fresh: true` set for self-chaining?
-- **Did the structural fidelity check pass for every selected pattern?** If the worksheet table has any row that isn't Pass, the score claims a pattern it does not implement.
+- For concerts: absolute `job_path`? `fresh: true` for self-chaining?
+- Would each validation catch an empty or placeholder output?
+- Are all referenced instruments registered?
+
+Self-review is reflection, not a checklist you race through. If you are moving fast enough to not notice which stage fails a question, you are moving too fast.
 
 ---
 
 ## Workspace Safety
 
-**Never** set workspace to the project root. If `workspace_lifecycle.archive_on_fresh` triggers, the workspace directory is archived or wiped. If workspace IS the project root, the entire project is destroyed.
+**Never** set workspace to the project root. If `workspace_lifecycle.archive_on_fresh` triggers, the workspace is archived or wiped. If workspace is the project root, the project is destroyed.
 
 **Default:** `./workspaces/{job-name}-workspace`
 
-**For scores that modify source code**, use a dual-path pattern: workspace for artifacts and state, a `project_root` variable for the codebase. Agents work in `project_root` and write artifacts to `workspace`.
+For scores that modify source code, use a dual-path pattern: workspace for artifacts and state, a `project_root` variable for the codebase. Agents work in `project_root` and write artifacts to `workspace`.
 
-**Always:**
-- Confirm the workspace path with the user
-- Verify the path doesn't contain `.git/`, `pyproject.toml`, or other project root markers at its root
-- Use `{{ workspace }}` in templates, `{workspace}` in validations — mixing these is the most common syntax error
+Always:
+
+- Confirm the workspace path with the user.
+- Verify the path doesn't contain `.git/`, `pyproject.toml`, or other project-root markers at its root.
+- Use `{{ workspace }}` in templates, `{workspace}` in validations — mixing these is the most common syntax error.
 
 ---
 
@@ -364,8 +338,8 @@ Then attack every sheet:
 
 | Purpose | Where |
 |---------|-------|
-| YAML syntax, validation types, config structure, common pitfalls | Invoke `marianne:score-authoring` |
-| Running, monitoring, debugging, recovering jobs | Invoke `marianne:command` |
+| YAML syntax, validation types, config structure, common pitfalls | `marianne:score-authoring` |
+| Running, monitoring, debugging, recovering jobs | `marianne:command` |
 | All 56 patterns by scale, with problems and signals | `scores/rosetta-corpus/INDEX.md` |
 | Individual pattern shapes, stages, composition edges | `scores/rosetta-corpus/patterns/<name>.md` |
 | Forces → generators → patterns mapping | `scores/rosetta-corpus/forces.md` |
