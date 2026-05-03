@@ -31,6 +31,25 @@ description: Use when writing, reviewing, or fixing Marianne score YAML configs.
 | `validations[].command` | `{workspace}` |
 | `capture_files[]` | `{{ workspace }}` |
 
+### Injection: file vs. directory cadenzas
+
+`prelude` and `cadenzas` items take exactly one of `file:` or `directory:`.
+
+```yaml
+sheet:
+  cadenzas:
+    1:
+      - file: "{{ workspace }}/setup.md"        # one file
+        as: skill
+    2:
+      - directory: "/abs/path/to/inputs"        # whole directory at once
+        as: context
+```
+
+**Directory cadenzas are NOT recursive** — only the immediate children of the directory are injected. Subdirectories are silently ignored. If you need a deeper tree, flatten the input dir or list each subdir as its own cadenza item. A common pattern: a small `instrument: cli` preflight stage curates/copies the relevant files into one flat directory the cadenza points at.
+
+See `patterns.md` → "Prelude & Cadenza" for full file/directory injection rules.
+
 ---
 
 ## Reference Docs

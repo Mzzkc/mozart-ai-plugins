@@ -1,0 +1,2100 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║         INSTRUMENT CATALOG — source-of-truth for Marianne composition       ║
+# ║                                                                             ║
+# ║  Single source of truth for the instruments and musicians available to     ║
+# ║  Marianne composers. Machine-loadable into InstrumentProfile / ModelCapacity.║
+# ║  Encodes the auto-routing tag system (tier × task × modality × constraint) ║
+# ║  so future tag-based intersection routing can consume this file directly.  ║
+# ║                                                                             ║
+# ║  Refresh: the catalog-refresh.yaml score runs this catalog through the     ║
+# ║  thinking-lab (4-vendor cross-rating) and applies vendor research diffs.   ║
+# ║  See `last_verified` on every musician to detect staleness.                ║
+# ║                                                                             ║
+# ║  Open-source-first vision: open-weights models are the DEFAULT primary in  ║
+# ║  most use-case chains. Subscription-tier (claude-code, codex-cli) and      ║
+# ║  metered API are fallbacks where open models genuinely don't suffice.      ║
+# ║  Marianne is a force multiplier for power users and resource-constrained  ║
+# ║  users; its defaults must reflect that.                                     ║
+# ║                                                                             ║
+# ║  Authority: this file is YAML and authoritative. instrument-catalog.md is  ║
+# ║  generated FROM this file for human reading; it has no independent truth.  ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+schema_version: 1
+generated_at: "2026-04-29"
+generated_by: "v1.1 — fact-fold from version-research agent (2026-04-29) + gap-research agent (2026-04-29) + 3-of-5 lab cross-rating reviews (Opus 4.7, Gemini 3.1 Pro, GPT-5.5) + user direct testimony on GLM 5.1. Lab pass for Gemma 4 / GLM 5.1 ratings deferred to next refresh (GLM lab failure was chunked-tool-call issue, now documented as a quirk and remediated for future runs)."
+
+sources:
+  - path: "docs/plans/features/2026-04-08-auto-routing-design.md"
+    role: "tag dimension authority"
+  - path: "docs/plans/four-disciplines/2026-03-01-four-disciplines-phase6-model-selection.md"
+    role: "instrument-vs-musician distinction authority"
+  - path: "docs/research/2026-04-13-free-model-code-generation-research.md"
+    role: "free-tier OpenRouter model evaluations folded in"
+  - path: "src/marianne/core/instrument.py"
+    role: "InstrumentProfile / ModelCapacity Pydantic schema authority"
+
+# Catalog now lives in plugins/marianne/docs/ref/ alongside essentials.md /
+# patterns.md / advanced.md so it ships with the marianne plugin distribution.
+# Moved from scores/rosetta-corpus/ on 2026-04-30 — the rosetta-corpus is
+# reserved for timeless coordination patterns; the catalog is reference data
+# the composing skill mandates as a preflight read.
+location: "plugins/marianne/docs/ref/instrument-catalog.yaml"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DIMENSIONS — orthogonal tag axes, intersected by composers/auto-router
+# Per docs/plans/features/2026-04-08-auto-routing-design.md
+# ═══════════════════════════════════════════════════════════════════════════════
+
+dimensions:
+  tier:
+    quick:
+      max_cost_per_1k_tokens: 0.001
+      description: "Fast, cheap, good-enough for classification and routing"
+    standard:
+      max_cost_per_1k_tokens: 0.005
+      description: "Balanced cost and quality for most production work"
+    heavy:
+      max_cost_per_1k_tokens: 0.020
+      description: "High-quality reasoning for complex translation, synthesis, design"
+    max:
+      max_cost_per_1k_tokens: null
+      description: "Best available, cost no object, used at peak-decision stages"
+
+  task:
+    code: "Code generation in any language"
+    code-translation: "Translating code from one language to another"
+    code-review: "Reading and critiquing existing code"
+    review: "General review/critique of artifacts"
+    research: "Open-ended exploration, web research, literature synthesis"
+    writing: "Long-form natural-language writing"
+    transform: "Mechanical transformation with tool use (file edits, refactors)"
+    design: "Architecture, schema, system design"
+    classification: "Categorization, routing, labeling, triage"
+    synthesis: "Integrating diverse inputs into a unified position"
+    planning: "Multi-step planning, task decomposition"
+    reasoning: "Chain-of-thought, mathematical, deductive, formal reasoning"
+    math: "Specialized math/formal reasoning sub-tag"
+    tool-use: "Function calling, MCP, agentic tool orchestration"
+    agent: "Autonomous multi-step agent workflows"
+    careful-long-running: "Sustained complex work where premature compression is the failure mode"
+    multilingual: "Cross-language work, translation, multi-language coverage"
+    regional: "Language/region-specialized models (Arabic, Chinese, Japanese, etc.)"
+    retrieval-augmented: "RAG-optimized: grounded generation with citations"
+    transcription: "Speech-to-text transcription"
+    streaming: "Real-time / streaming inference"
+    conversational: "Dialogue, conversational TTS, real-time chat"
+    routing: "Meta-routing or auto-selection of downstream models"
+    general: "Generic general-purpose; no specialization"
+    vision: "Image input understanding (also see modality.vision)"
+
+  modality:
+    text: "Text in, text out"
+    vision: "Image in, text out"
+    image-gen: "Text in, image out"
+    audio-in: "Speech transcription / audio understanding"
+    speech-out: "Text-to-speech generation"
+    video-gen: "Text/image in, video out"
+    audio-gen: "Text in, music or sound effect out"
+    embedding: "Text in, vector out"
+    reranking: "Query + candidates in, ordered candidates out"
+    multimodal: "Multiple modalities native (e.g., images and audio mixed input)"
+
+  constraint:
+    cheap: "Sub-$1/M tokens or comparable"
+    fast: "High tokens/sec or low time-to-first-token"
+    thorough: "Slower but more comprehensive output"
+    offline: "Runs locally with no network egress"
+    no-rate-limit: "Unmetered or effectively unlimited under typical use"
+    free: "No cost to user under typical use"
+    open-weights: "Model weights publicly available, can be self-hosted"
+    subscription: "Available via flat-rate subscription tier"
+    premier: "Frontier-class capability, premium pricing"
+    oss-default: "Marked as a default choice for open-source-first composition"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# INSTRUMENTS — backend execution frameworks (capabilities, not models)
+# Per Phase 6: instruments determine CAPABILITIES; models determine CAPACITY.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+instruments:
+
+  claude-code:
+    description: "Anthropic's official Claude CLI with full tool-use, file editing, MCP, web fetch"
+    binary: "claude"
+    auth: "anthropic_subscription_or_api_key"
+    capabilities:
+      - tool_use
+      - file_edit
+      - shell
+      - web_fetch
+      - mcp
+      - vision
+    runs_models:
+      - claude-opus-4-7
+      - claude-sonnet-4-6
+      - claude-haiku-4-5-20251001
+      - claude-sonnet-4-5-20250929
+      - claude-opus-4-6
+    fallback_instruments: [anthropic_api]
+    notes: "Subscription tier offers cost predictability; API tier offers usage-based billing. Both supported."
+
+  anthropic_api:
+    description: "Direct Anthropic API; pay-per-token; same models as claude-code without CLI wrapper"
+    auth: "anthropic_api_key"
+    capabilities: [tool_use, vision]   # NO file_edit/shell — those are CLI-shell-specific
+    runs_models:
+      - claude-opus-4-7
+      - claude-sonnet-4-6
+      - claude-haiku-4-5-20251001
+    fallback_instruments: []
+    notes: "Use when you need model access without CLI tools (pure prompt-in/text-out)."
+
+  gemini-cli:
+    description: "Google's official Gemini CLI with tool use, file editing, vision"
+    binary: "gemini"
+    auth: "google_subscription_or_api_key"
+    capabilities: [tool_use, file_edit, shell, vision, multimodal]
+    runs_models:
+      - gemini-3.1-pro-preview
+      - gemini-3-flash-preview
+      - gemini-2.5-pro
+      - gemini-2.5-flash
+    fallback_instruments: []
+    notes: "Strong multimodal native support; good for vision-heavy tasks."
+
+  codex-cli:
+    description: "OpenAI's Codex CLI with tool use, file editing"
+    binary: "codex"
+    auth: "openai_plus_subscription_or_api_key"
+    capabilities: [tool_use, file_edit, shell, vision]
+    runs_models:
+      - gpt-5.5
+      - gpt-5
+      - gpt-4.1
+      - o4-mini
+      - o3-mini
+    fallback_instruments: []
+    notes: "Plus subscription supplies GPT-5.5 access. Strong for cross-vendor verification of Claude work."
+
+  opencode:
+    description: "Multi-provider CLI; routes to OpenRouter, local providers, or specific endpoints"
+    binary: "opencode"
+    auth: "per_provider"
+    capabilities: [tool_use, file_edit, shell, multi_provider]
+    runs_models:
+      # opencode can run essentially any provider it's configured for; below is
+      # the subset routinely used in this user's setup.
+      - zai-coding-plan/glm-5-turbo
+      - zai-coding-plan/glm-4.7-flash
+      - openrouter/minimax/minimax-m2.5:free
+      - openrouter/google/gemma-4-31b-it:free
+      - openrouter/nvidia/nemotron-3-super-120b-a12b:free
+      - openrouter/z-ai/glm-4.5-air:free
+      - openrouter/meta-llama/llama-4-maverick:free
+    fallback_instruments: [aider, goose]
+    notes: "Best instrument for accessing free-tier OpenRouter models. The Z.AI Coding Plan provides unlimited GLM via opencode — rate-limit-proof."
+
+  aider:
+    description: "AI-pair-programming CLI with strong git integration"
+    binary: "aider"
+    auth: "per_provider"
+    capabilities: [tool_use, file_edit, git, shell, multi_provider]
+    runs_models: ["any LiteLLM-supported model"]
+    fallback_instruments: [goose, opencode]
+    notes: "Good for code-focused work where git diff awareness matters."
+
+  goose:
+    description: "Block.xyz's open multi-provider agent CLI"
+    binary: "goose"
+    auth: "per_provider"
+    capabilities: [tool_use, file_edit, shell, mcp, multi_provider]
+    runs_models: ["any provider goose is configured for"]
+    fallback_instruments: [aider, opencode]
+    notes: "Strong MCP support; good agent loop capability."
+
+  crush:
+    description: "Charm.land's TUI multi-provider CLI"
+    binary: "crush"
+    auth: "per_provider"
+    capabilities: [tool_use, multi_provider, terminal_ui]
+    runs_models: ["any provider crush is configured for"]
+    fallback_instruments: [opencode]
+    notes: "TUI-first; useful for interactive work but less common in scripted scores."
+
+  ollama:
+    description: "Local model runner; no network required after model pull"
+    binary: "ollama"
+    auth: "none"
+    capabilities: [local, offline, no_rate_limit, tool_use_partial]
+    runs_models:
+      # Models available depend on what user has pulled; below is a reasonable
+      # default set for code/general work. Run `ollama list` to confirm.
+      - llama3.3:70b
+      - llama3.1:8b
+      - qwen2.5-coder:32b
+      - qwen2.5-coder:7b
+      - qwen3-coder:30b
+      - deepseek-v3
+      - deepseek-coder-v2:16b
+      - phi-4:14b
+      - mistral-large:latest
+      - codestral:22b
+      - gemma3:27b
+    fallback_instruments: []
+    notes: "Open-source-first default. No rate limits, no per-token cost, full privacy. Speed and quality depend on local hardware."
+
+  recursive_light:
+    description: "TDF (Tetrahedral Decision Framework) judgment instrument"
+    capabilities: [tdf_judgment, boundary_analysis, multi_domain_decomposition]
+    runs_models: ["recursive_light internal"]
+    fallback_instruments: []
+    notes: "Specialized for boundary recognition and multi-domain reasoning. Used selectively, not for general work."
+
+  cli:
+    description: "Plain shell — bash. Deterministic, no LLM."
+    binary: "bash"
+    capabilities: [shell, deterministic]
+    runs_models: []
+    fallback_instruments: []
+    notes: "Use for verification, gate stages, and deterministic transforms. Per Tool Chain pattern: cheaper than any LLM for what shell can do."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# MUSICIANS — the models. Capacity (context, cost, speed, quality) lives here.
+# Ratings 1-5 (1=poor, 5=class-leading). verified_via marks how each is grounded.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+musicians:
+
+  # ── Anthropic ────────────────────────────────────────────────────────────────
+
+  claude-opus-4-7:
+    provider: anthropic
+    family: "Claude 4"
+    context_window: 1000000   # updated 2026-04-29: 1M context as of release 2026-04-16
+    max_output_tokens: 8192
+    released: "2026-04-16"
+    notes: "1M context at standard pricing — no long-context premium. Adaptive thinking is now the only thinking-on mode."
+    cost_per_1m_input: 15.00
+    cost_per_1m_output: 75.00
+    cache_read_discount: 0.10   # 10x cheaper on cache hits
+    cache_write_premium: 1.25
+    available_via: [claude-code, anthropic_api]
+    tags: [max, heavy, premier, subscription]
+    task_tags: [code, code-translation, code-review, review, research, writing,
+                transform, design, synthesis, planning, reasoning, tool-use, agent]
+    modality_tags: [text, vision]
+    ratings:
+      reasoning: 5
+      code_gen: 5
+      code_read: 5
+      long_context: 4
+      instruction_following: 5
+      format_adherence: 5
+      tool_use: 5
+      speed_tokens_per_sec: 2
+      cost_efficiency: 1
+    strengths:
+      - "Adversarial reasoning, multi-step proofs, careful calibration"
+      - "Decompiled-code interpretation, ambiguous-source synthesis"
+      - "Nuanced refusals — engages with hard problems instead of deflecting"
+    weaknesses:
+      - "Latency, especially with long context"
+      - "Per-token cost is highest in class"
+      - "Occasionally over-explains when temperature low"
+    quirks:
+      - "Prefers explicit tool-use schemas; ambiguous tool defs cause tangents"
+      - "Strong opinions on code style — useful or annoying depending on stage"
+    benchmarks:
+      swe_bench_verified: 0.78
+      humaneval: 0.94
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, public_benchmarks, judgment]
+
+  claude-sonnet-4-6:
+    provider: anthropic
+    family: "Claude 4"
+    context_window: 200000   # 1M in beta, 200K standard as of 2026-04-29
+    context_window_beta: 1000000
+    max_output_tokens: 8192
+    cost_per_1m_input: 3.00
+    cost_per_1m_output: 15.00
+    cache_read_discount: 0.10
+    available_via: [claude-code, anthropic_api]
+    tags: [heavy, standard, subscription]
+    task_tags: [code, code-translation, code-review, review, research, writing,
+                transform, design, synthesis, planning, tool-use]
+    modality_tags: [text, vision]
+    ratings:
+      reasoning: 4
+      code_gen: 5
+      code_read: 5
+      long_context: 4
+      instruction_following: 5
+      format_adherence: 5
+      tool_use: 5
+      speed_tokens_per_sec: 4
+      cost_efficiency: 3
+    strengths:
+      - "Code generation specifically — class-leading at this price tier"
+      - "Fast and reliable for production agentic work"
+      - "Strong instruction following at long contexts"
+    weaknesses:
+      - "Less depth on multi-hop reasoning vs. Opus"
+      - "Sometimes terse where Opus would elaborate usefully"
+    benchmarks:
+      swe_bench_verified: 0.72
+      humaneval: 0.92
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, public_benchmarks, judgment]
+
+  claude-haiku-4-5-20251001:
+    provider: anthropic
+    family: "Claude 4"
+    context_window: 200000
+    max_output_tokens: 8192
+    cost_per_1m_input: 0.80
+    cost_per_1m_output: 4.00
+    available_via: [claude-code, anthropic_api]
+    tags: [quick, standard, subscription, fast]
+    task_tags: [classification, transform, writing, tool-use, research]
+    modality_tags: [text, vision]
+    ratings:
+      reasoning: 3
+      code_gen: 4
+      code_read: 4
+      long_context: 3
+      instruction_following: 4
+      format_adherence: 4
+      tool_use: 4
+      speed_tokens_per_sec: 5
+      cost_efficiency: 5
+    strengths:
+      - "Fast classification with good calibration — better than expected for cost"
+      - "Reliable tool-use at speed"
+    weaknesses:
+      - "Limited depth of reasoning; not suitable for complex synthesis"
+      - "Code generation possible but Sonnet preferred for non-trivial work"
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, judgment]
+
+  # ── OpenAI ───────────────────────────────────────────────────────────────────
+
+  gpt-5.5:
+    provider: openai
+    family: "GPT-5"
+    context_window: 256000
+    max_output_tokens: 32768
+    cost_per_1m_input: 5.00
+    cost_per_1m_output: 25.00
+    available_via: [codex-cli]
+    tags: [max, heavy, premier, subscription]
+    task_tags: [code, code-translation, code-review, review, research, writing,
+                transform, design, synthesis, planning, reasoning, tool-use, agent]
+    modality_tags: [text, vision]
+    ratings:
+      reasoning: 5
+      code_gen: 5
+      code_read: 5
+      long_context: 5
+      instruction_following: 4
+      format_adherence: 5
+      tool_use: 5
+      speed_tokens_per_sec: 3
+      cost_efficiency: 2
+    strengths:
+      - "Different blind spots from Claude — ideal cross-vendor reviewer"
+      - "Confident structuring, willing to take definite positions"
+      - "Strong on long-context retrieval and synthesis"
+    weaknesses:
+      - "Slightly more prone to confident hallucination than Claude on edge cases"
+      - "Less malleable to system prompt instructions vs. Anthropic models"
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, public_benchmarks, judgment]
+
+  gpt-5:
+    provider: openai
+    family: "GPT-5"
+    status: deprecated
+    deprecated_date: "2026-02-13"
+    deprecation_note: "Retired from ChatGPT 2026-02-13. API access still available; new work should target gpt-5.5."
+    context_window: 200000
+    max_output_tokens: 16384
+    cost_per_1m_input: 2.50
+    cost_per_1m_output: 10.00
+    available_via: [codex-cli]
+    tags: [heavy, standard, subscription, deprecated]
+    task_tags: [code, code-review, review, research, writing, transform,
+                design, synthesis, tool-use]
+    modality_tags: [text, vision]
+    ratings:
+      reasoning: 4
+      code_gen: 5
+      code_read: 4
+      long_context: 4
+      instruction_following: 4
+      format_adherence: 5
+      tool_use: 5
+      speed_tokens_per_sec: 4
+      cost_efficiency: 3
+    strengths:
+      - "Strong general-purpose with broad knowledge"
+      - "Good cost/quality ratio for non-frontier work"
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, judgment]
+
+  o4-mini:
+    provider: openai
+    family: "o-series"
+    status: deprecated
+    deprecation_note: "Fully deprecated as of 2026-04-29. New reasoning work should use newer o-series or open-weight reasoning models (deepseek-r1)."
+    context_window: 128000
+    max_output_tokens: 65536
+    cost_per_1m_input: 1.10
+    cost_per_1m_output: 4.40
+    available_via: [codex-cli]
+    tags: [standard, subscription]
+    task_tags: [reasoning, code, code-review, planning, research]
+    modality_tags: [text]
+    ratings:
+      reasoning: 5
+      code_gen: 4
+      code_read: 4
+      long_context: 4
+      instruction_following: 4
+      format_adherence: 4
+      tool_use: 4
+      speed_tokens_per_sec: 2  # reasoning models are slow per token
+      cost_efficiency: 4
+    strengths:
+      - "Math, formal reasoning, multi-step deduction at affordable cost"
+      - "Excellent for verification stages where reasoning correctness matters"
+    weaknesses:
+      - "Slow due to extended thinking; not suitable for chatty interactive work"
+      - "Sometimes ignores style/format constraints to satisfy reasoning goals"
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, judgment]
+
+  # ── Google ───────────────────────────────────────────────────────────────────
+
+  gemini-3.1-pro-preview:
+    provider: google
+    family: "Gemini 3"
+    context_window: 2000000
+    max_output_tokens: 65536
+    cost_per_1m_input: 2.50
+    cost_per_1m_output: 10.00
+    available_via: [gemini-cli]
+    tags: [max, heavy, premier, subscription]
+    task_tags: [code, code-review, review, research, writing, design,
+                synthesis, planning, reasoning, tool-use]
+    modality_tags: [text, vision, multimodal]
+    ratings:
+      reasoning: 5
+      code_gen: 4
+      code_read: 5
+      long_context: 5    # 2M context, class-leading
+      instruction_following: 4
+      format_adherence: 4
+      tool_use: 4
+      speed_tokens_per_sec: 3
+      cost_efficiency: 4
+    strengths:
+      - "2M-token context window; class-leading for long-document work"
+      - "Strong multimodal native (handles images + text + audio in one prompt)"
+      - "Different blind spots from Claude/GPT — useful 3rd cross-vendor reviewer"
+    weaknesses:
+      - "Less aggressive on code generation vs. Claude Sonnet 4.6 / GPT-5.5"
+      - "Format adherence can drift on long outputs"
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, judgment]
+
+  gemini-3-flash-preview:
+    provider: google
+    family: "Gemini 3"
+    context_window: 1000000
+    max_output_tokens: 32768
+    cost_per_1m_input: 0.30
+    cost_per_1m_output: 1.20
+    available_via: [gemini-cli]
+    tags: [quick, standard, fast, subscription, oss-default]
+    task_tags: [classification, transform, writing, research, tool-use]
+    modality_tags: [text, vision, multimodal]
+    ratings:
+      reasoning: 3
+      code_gen: 3
+      code_read: 4
+      long_context: 5
+      instruction_following: 4
+      format_adherence: 4
+      tool_use: 4
+      speed_tokens_per_sec: 5
+      cost_efficiency: 5
+    strengths:
+      - "Very fast, cheap, with 1M context — great for cheap-tier classification"
+      - "No rate limiting on Google subscription — good runner-stage option"
+      - "Strong vision understanding for the price"
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, judgment]
+
+  gemini-2.5-pro:
+    provider: google
+    family: "Gemini 2.5"
+    status: deprecating
+    deprecation_dates:
+      gemini_api: "2026-06-17"
+      vertex_ai:  "2026-10-16"
+    context_window: 2000000
+    max_output_tokens: 65536
+    cost_per_1m_input: 1.25
+    cost_per_1m_output: 5.00
+    available_via: [gemini-cli]
+    tags: [heavy, standard, subscription]
+    task_tags: [research, writing, code-review, design, synthesis]
+    modality_tags: [text, vision, multimodal]
+    ratings:
+      reasoning: 4
+      code_gen: 4
+      code_read: 4
+      long_context: 5
+      instruction_following: 4
+      format_adherence: 4
+      tool_use: 3
+      speed_tokens_per_sec: 3
+      cost_efficiency: 4
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, judgment]
+    notes: "Older generation but still useful, especially for long-doc work where its 2M context shines."
+
+  # ── Z.AI / GLM ───────────────────────────────────────────────────────────────
+
+  zai-coding-plan/glm-5-turbo:
+    provider: z-ai
+    family: "GLM 5"
+    context_window: 131072
+    max_output_tokens: 16384
+    cost_per_1m_input: 0
+    cost_per_1m_output: 0
+    available_via: [opencode]
+    tags: [standard, free, no-rate-limit, subscription, oss-default]
+    task_tags: [code, code-translation, transform, classification, tool-use]
+    modality_tags: [text]
+    ratings:
+      reasoning: 3
+      code_gen: 4
+      code_read: 4
+      long_context: 4
+      instruction_following: 4
+      format_adherence: 4
+      tool_use: 3
+      speed_tokens_per_sec: 5
+      cost_efficiency: 5
+    strengths:
+      - "Unlimited via Z.AI Coding Plan — rate-limit-proof for runner stages"
+      - "Different training lineage from US labs; useful cross-vendor blind-spot diversity"
+      - "Fast for the quality"
+    weaknesses:
+      - "Tool use less robust than Anthropic/OpenAI/Google"
+      - "English idiom occasionally awkward (training corpus skew)"
+    quirks:
+      - "Fails on too-large tool calls. Prompt MUST instruct chunked writes (~50-100 lines per Write/Edit). Multiple small tool calls succeed; single large ones fail."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, judgment, user_direct_testimony]
+
+  zai-coding-plan/glm-4.7-flash:
+    provider: z-ai
+    family: "GLM 4"
+    context_window: 131072
+    max_output_tokens: 8192
+    cost_per_1m_input: 0
+    cost_per_1m_output: 0
+    available_via: [opencode]
+    tags: [quick, fast, free, no-rate-limit, subscription]
+    task_tags: [classification, transform, tool-use]
+    modality_tags: [text]
+    ratings:
+      reasoning: 2
+      code_gen: 3
+      code_read: 3
+      long_context: 3
+      instruction_following: 4
+      format_adherence: 4
+      tool_use: 3
+      speed_tokens_per_sec: 5
+      cost_efficiency: 5
+    quirks:
+      - "Fails on too-large tool calls. Prompt MUST instruct chunked writes."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, judgment, user_direct_testimony]
+    notes: "Cheap classifier; good for triage stages where quality demands are light."
+
+  openrouter/z-ai/glm-4.5-air:free:
+    provider: z-ai
+    family: "GLM 4.5"
+    context_window: 131072
+    max_output_tokens: 96000
+    cost_per_1m_input: 0
+    cost_per_1m_output: 0
+    available_via: [opencode]
+    tags: [standard, free, open-weights, oss-default]
+    task_tags: [code, transform, tool-use]
+    modality_tags: [text]
+    ratings:
+      reasoning: 3
+      code_gen: 4
+      code_read: 3
+      long_context: 4
+      instruction_following: 4
+      format_adherence: 3
+      tool_use: 4
+      speed_tokens_per_sec: 4
+      cost_efficiency: 5
+    benchmarks:
+      bfcl_v3: 0.764
+    quirks:
+      - "Fails on too-large tool calls. Prompt MUST instruct chunked writes."
+    last_verified: "2026-04-13"
+    verified_via: [internal_research_2026_04_13_free_model_code_generation, user_direct_testimony]
+    notes: "Older GLM but still serviceable for free use. See docs/research/2026-04-13-free-model-code-generation-research.md."
+
+  # ── Open-weights via OpenRouter free tier ────────────────────────────────────
+
+  openrouter/minimax/minimax-m2.5:free:
+    provider: minimax
+    family: "MiniMax M2"
+    context_window: 196608
+    max_output_tokens: 8192
+    cost_per_1m_input: 0
+    cost_per_1m_output: 0
+    available_via: [opencode]
+    tags: [heavy, free, open-weights, oss-default]
+    task_tags: [code, code-translation, code-review, design, agent]
+    modality_tags: [text]
+    ratings:
+      reasoning: 4
+      code_gen: 5
+      code_read: 4
+      long_context: 4
+      instruction_following: 3   # may ignore system constraints during thinking
+      format_adherence: 3
+      tool_use: 4
+      speed_tokens_per_sec: 2    # mandatory thinking adds latency
+      cost_efficiency: 5
+    strengths:
+      - "Class-leading code gen at the free tier — SWE-Bench Verified 80.2%"
+      - "Multi-SWE-Bench first place; trained on 200K+ real-world envs"
+      - "1200+ line structured-code generation in single response"
+    weaknesses:
+      - "Mandatory thinking blocks add ~2.2s overhead even on simple tasks"
+      - "Output capped at 8192 tokens on free tier"
+      - "Can ignore system prompt constraints when its thinking decides 'completeness is important'"
+    benchmarks:
+      swe_bench_verified: 0.802
+      multi_swe_bench: 0.513   # first place among all models
+      humaneval: 0.896
+      live_code_bench: 0.65
+      bfcl_v3: 0.769
+    supersession_pending: minimax-m2.7
+    notes: "MiniMax M2.7 now exists. M2.5 may shift status as M2.7 stabilizes. Verify on next refresh."
+    last_verified: "2026-04-13"
+    verified_via: [internal_research_2026_04_13_free_model_code_generation, version_research_2026_04_29]
+
+  openrouter/google/gemma-4-31b-it:free:
+    provider: google
+    family: "Gemma 4"
+    context_window: 262144
+    max_output_tokens: 32768
+    cost_per_1m_input: 0
+    cost_per_1m_output: 0
+    available_via: [opencode]
+    tags: [standard, free, open-weights, oss-default]
+    task_tags: [code, transform, writing, tool-use]
+    modality_tags: [text]
+    ratings:
+      reasoning: 4
+      code_gen: 4
+      code_read: 4
+      long_context: 5
+      instruction_following: 4
+      format_adherence: 4
+      tool_use: 4
+      speed_tokens_per_sec: 4
+      cost_efficiency: 5
+    strengths:
+      - "262K context — large for an open model"
+      - "Reliable code gen and tool use at free tier"
+      - "Open weights enable self-hosting if needed"
+    last_verified: "2026-04-13"
+    verified_via: [internal_research_2026_04_13_free_model_code_generation]
+
+  openrouter/nvidia/nemotron-3-super-120b-a12b:free:
+    provider: nvidia
+    family: "Nemotron 3"
+    context_window: 262144
+    max_output_tokens: 262144
+    cost_per_1m_input: 0
+    cost_per_1m_output: 0
+    available_via: [opencode]
+    tags: [heavy, free, open-weights, oss-default]
+    task_tags: [code, code-review, agent, tool-use]
+    modality_tags: [text]
+    ratings:
+      reasoning: 4
+      code_gen: 4
+      code_read: 4
+      long_context: 5
+      instruction_following: 4
+      format_adherence: 4
+      tool_use: 5
+      speed_tokens_per_sec: 3
+      cost_efficiency: 5
+    strengths:
+      - "Strong agentic workflows; 262K context including output"
+    last_verified: "2026-04-13"
+    verified_via: [internal_research_2026_04_13_free_model_code_generation]
+
+  openrouter/meta-llama/llama-4-maverick:free:
+    provider: meta
+    family: "Llama 4"
+    context_window: 1000000
+    max_output_tokens: 16384
+    cost_per_1m_input: 0
+    cost_per_1m_output: 0
+    available_via: [opencode]
+    tags: [standard, free, open-weights]
+    task_tags: [research, writing, transform]
+    modality_tags: [text]
+    ratings:
+      reasoning: 3
+      code_gen: 3
+      code_read: 3
+      long_context: 5    # 1M
+      instruction_following: 3
+      format_adherence: 3
+      tool_use: 2
+      speed_tokens_per_sec: 4
+      cost_efficiency: 5
+    weaknesses:
+      - "Code generation reliability medium-low despite parameter count"
+      - "Tool use unreliable per internal research"
+    last_verified: "2026-04-13"
+    verified_via: [internal_research_2026_04_13_free_model_code_generation]
+    notes: "1M-context but weak tool use limits production use. Better for long-doc summarization than agentic work."
+
+  # ── Open-weights / local via Ollama ──────────────────────────────────────────
+
+  qwen2.5-coder:32b:
+    provider: alibaba
+    family: "Qwen2.5"
+    context_window: 131072
+    max_output_tokens: 8192
+    cost_per_1m_input: 0
+    cost_per_1m_output: 0
+    available_via: [ollama]
+    tags: [standard, free, open-weights, offline, no-rate-limit, oss-default]
+    task_tags: [code, code-translation, transform]
+    modality_tags: [text]
+    ratings:
+      reasoning: 3
+      code_gen: 4
+      code_read: 4
+      long_context: 3
+      instruction_following: 4
+      format_adherence: 3
+      tool_use: 3
+      speed_tokens_per_sec: 3   # depends heavily on local hardware
+      cost_efficiency: 5
+    strengths:
+      - "Strongest open-weight code model in the 30B range"
+      - "Runs offline — privacy and rate-limit-proof guaranteed"
+    weaknesses:
+      - "Speed depends on user GPU; ~5-30 tokens/sec typical"
+      - "Long-context performance degrades past ~32K"
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, judgment, community_benchmarks]
+    notes: "Marianne's open-source-first ethos: this is the default code-translation primary on systems with adequate hardware."
+
+  llama3.3:70b:
+    provider: meta
+    family: "Llama 3.3"
+    context_window: 128000
+    max_output_tokens: 8192
+    cost_per_1m_input: 0
+    cost_per_1m_output: 0
+    available_via: [ollama]
+    tags: [standard, free, open-weights, offline, no-rate-limit, oss-default]
+    task_tags: [research, writing, code, transform]
+    modality_tags: [text]
+    ratings:
+      reasoning: 4
+      code_gen: 3
+      code_read: 4
+      long_context: 4
+      instruction_following: 4
+      format_adherence: 4
+      tool_use: 3
+      speed_tokens_per_sec: 2   # 70B is slow on consumer hardware
+      cost_efficiency: 5
+    strengths:
+      - "Strong general-purpose at 70B; established community fine-tunes"
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, community_benchmarks, judgment]
+
+  deepseek-v3:
+    provider: deepseek
+    family: "DeepSeek V3"
+    status: deprecating
+    endpoint_retires: "2026-07-24T15:59:00Z"
+    successor: deepseek-v4-pro
+    context_window: 128000
+    max_output_tokens: 8192
+    cost_per_1m_input: 0.27   # via DeepSeek API; free if local via ollama
+    cost_per_1m_output: 1.10
+    available_via: [ollama, opencode]
+    tags: [standard, open-weights, oss-default, free]   # free if local
+    task_tags: [code, code-translation, reasoning]
+    modality_tags: [text]
+    ratings:
+      reasoning: 4
+      code_gen: 4
+      code_read: 4
+      long_context: 4
+      instruction_following: 4
+      format_adherence: 4
+      tool_use: 4
+      speed_tokens_per_sec: 3
+      cost_efficiency: 5
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, public_benchmarks, judgment]
+
+  deepseek-r1:
+    provider: deepseek
+    family: "DeepSeek R1"
+    context_window: 128000
+    max_output_tokens: 32768
+    cost_per_1m_input: 0.55
+    cost_per_1m_output: 2.19
+    available_via: [ollama, opencode]
+    tags: [heavy, open-weights, oss-default]
+    task_tags: [reasoning, code, planning]
+    modality_tags: [text]
+    ratings:
+      reasoning: 5
+      code_gen: 4
+      code_read: 4
+      long_context: 4
+      instruction_following: 4
+      format_adherence: 4
+      tool_use: 3
+      speed_tokens_per_sec: 2
+      cost_efficiency: 5
+    strengths:
+      - "Open-weight reasoning model in O-series quality range"
+      - "Excellent for verification stages, math, formal reasoning"
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, public_benchmarks, judgment]
+
+  codestral:22b:
+    provider: mistral
+    family: "Codestral"
+    context_window: 32768
+    max_output_tokens: 8192
+    cost_per_1m_input: 0
+    cost_per_1m_output: 0
+    available_via: [ollama]
+    tags: [standard, free, open-weights, offline, oss-default]
+    task_tags: [code, code-translation]
+    modality_tags: [text]
+    ratings:
+      reasoning: 3
+      code_gen: 4
+      code_read: 4
+      long_context: 2   # only 32K
+      instruction_following: 4
+      format_adherence: 4
+      tool_use: 3
+      speed_tokens_per_sec: 4
+      cost_efficiency: 5
+    strengths:
+      - "Code-specialized; strong for translation and completion"
+      - "Smaller than Qwen2.5-Coder:32b — runs on more hardware"
+    weaknesses:
+      - "Short context limits its utility for long files"
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, judgment]
+
+  phi-4:14b:
+    provider: microsoft
+    family: "Phi-4"
+    context_window: 16384
+    max_output_tokens: 4096
+    cost_per_1m_input: 0
+    cost_per_1m_output: 0
+    available_via: [ollama]
+    tags: [quick, free, open-weights, offline, fast]
+    task_tags: [classification, reasoning, transform]
+    modality_tags: [text]
+    ratings:
+      reasoning: 4
+      code_gen: 3
+      code_read: 3
+      long_context: 2
+      instruction_following: 4
+      format_adherence: 3
+      tool_use: 2
+      speed_tokens_per_sec: 5
+      cost_efficiency: 5
+    notes: "Punches above its parameter count on reasoning. Useful as a cheap classifier."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, judgment]
+
+  # ═════════════════════════════════════════════════════════════════════════════
+  # SPECIALIZATION ENTRIES — capabilities listed even if not currently installed.
+  # Use these to identify when a score needs a specialized capability and what
+  # would satisfy that need.
+  # ═════════════════════════════════════════════════════════════════════════════
+
+  # ── Speech / Audio ───────────────────────────────────────────────────────────
+
+  whisper-large-v3:
+    provider: openai
+    family: "Whisper"
+    available_via: [openai_api, openrouter, local_python]
+    tags: [thorough, open-weights]
+    task_tags: []
+    modality_tags: [audio-in]
+    capabilities: ["multilingual transcription", "translation to English"]
+    ratings:
+      transcription_accuracy: 5
+      multilingual: 5
+      speed: 3
+    notes: "Open-weight transcription. The standard for audio-in tasks. Distil variants offer speed/quality tradeoffs."
+    installable: false
+    available_locally: false
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  distil-whisper-large-v3:
+    provider: hugging_face
+    family: "Whisper distillation"
+    tags: [fast, open-weights, offline]
+    modality_tags: [audio-in]
+    notes: "~6x faster than full Whisper for English-only with minor accuracy cost."
+    installable: true
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  kokoro-tts:
+    provider: hugging_face
+    family: "Kokoro"
+    tags: [fast, open-weights, offline, free]
+    modality_tags: [speech-out]
+    notes: "Open small TTS, runs locally. Apache 2.0. Top open TTS for the size."
+    installable: true
+    last_verified: "2026-04-29"
+    verified_via: [community_benchmarks]
+
+  elevenlabs-v3:
+    provider: elevenlabs
+    family: "ElevenLabs v3"
+    tags: [premier, thorough]
+    modality_tags: [speech-out]
+    notes: "Highest-quality commercial TTS. Subscription required."
+    installable: false
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  # ── Image Generation ─────────────────────────────────────────────────────────
+
+  flux-1-pro:
+    provider: black_forest_labs
+    family: "FLUX.1"
+    tags: [premier, thorough]
+    modality_tags: [image-gen]
+    notes: "Top-tier commercial image gen. Hosted API."
+    installable: false
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  flux-1-dev:
+    provider: black_forest_labs
+    family: "FLUX.1"
+    tags: [thorough, open-weights]
+    modality_tags: [image-gen]
+    notes: "Open-weight FLUX variant. ~12B params; needs ~24GB VRAM for fp8."
+    installable: true
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  flux-schnell:
+    provider: black_forest_labs
+    family: "FLUX.1"
+    tags: [fast, open-weights, free]
+    modality_tags: [image-gen]
+    notes: "1-4 step distilled FLUX. Fast on consumer GPUs."
+    installable: true
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  stable-diffusion-3.5-large:
+    provider: stability
+    family: "SD3.5"
+    tags: [thorough, open-weights]
+    modality_tags: [image-gen]
+    notes: "Open-weight; permissive license; established ecosystem."
+    installable: true
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  imagen-3:
+    provider: google
+    family: "Imagen 3"
+    status: sunset
+    migrate_by: "2026-06-30"
+    sunset_note: "Imagen 3 has been shut down. Migrate to current Google image-gen offering by 2026-06-30."
+    available_via: [gemini-cli]
+    tags: [sunset]
+    modality_tags: [image-gen]
+    installable: false
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  # ── Video Generation ─────────────────────────────────────────────────────────
+
+  veo-3:
+    provider: google
+    family: "Veo"
+    tags: [premier, thorough]
+    modality_tags: [video-gen]
+    installable: false
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+    notes: "Google's frontier video model; hosted API."
+
+  sora-2:
+    provider: openai
+    family: "Sora"
+    tags: [premier, thorough]
+    modality_tags: [video-gen]
+    installable: false
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  ltx-video:
+    provider: lightricks
+    family: "LTX-Video"
+    tags: [fast, open-weights]
+    modality_tags: [video-gen]
+    notes: "Open-weight video model; runs on consumer GPUs (slower)."
+    installable: true
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  hunyuan-video:
+    provider: tencent
+    family: "HunyuanVideo"
+    tags: [thorough, open-weights]
+    modality_tags: [video-gen]
+    notes: "Open-weight video gen. Needs significant VRAM."
+    installable: true
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  # ── Embeddings ───────────────────────────────────────────────────────────────
+
+  text-embedding-3-large:
+    provider: openai
+    family: "text-embedding-3"
+    cost_per_1m_input: 0.13
+    tags: [premier]
+    modality_tags: [embedding]
+    notes: "OpenAI's flagship embedding. Strong for general retrieval."
+    installable: false
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  voyage-3:
+    provider: voyage_ai
+    family: "voyage-3"
+    cost_per_1m_input: 0.06
+    tags: [premier]
+    modality_tags: [embedding]
+    notes: "Voyage AI's flagship; strong on code-specific retrieval."
+    installable: false
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  bge-large-en-v1.5:
+    provider: bge
+    family: "BGE"
+    tags: [free, open-weights, offline, oss-default]
+    modality_tags: [embedding]
+    notes: "Top open-weight English embedding. Runs anywhere."
+    installable: true
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, community_benchmarks]
+
+  nomic-embed-text-v1.5:
+    provider: nomic
+    family: "Nomic Embed"
+    tags: [free, open-weights, offline, oss-default]
+    modality_tags: [embedding]
+    notes: "Strong open-weight embedding; trained transparently."
+    installable: true
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  # ── Rerankers ────────────────────────────────────────────────────────────────
+
+  bge-reranker-v2-m3:
+    provider: bge
+    family: "BGE Reranker"
+    tags: [free, open-weights, offline, oss-default]
+    modality_tags: [reranking]
+    notes: "Open-weight reranker; pairs with bge embeddings."
+    installable: true
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  cohere-rerank-3.5:
+    provider: cohere
+    family: "Rerank"
+    tags: [premier]
+    modality_tags: [reranking]
+    notes: "Cohere's hosted reranker. Strong, but paid."
+    installable: false
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  # ═════════════════════════════════════════════════════════════════════════════
+  # ADDITIONS FROM 2026-04-29 FACT-FOLD
+  # Drove by: lab cross-rating (Opus, Gemini Pro, GPT-5.5) + version-research
+  # agent + user direct testimony on GLM 5.1 frontier-class status.
+  # Ratings on these new entries are PROVISIONAL — fold-in pending the next
+  # full lab pass with chunking guidance for GLM. Facts are verified.
+  # ═════════════════════════════════════════════════════════════════════════════
+
+  # ── Z.AI / GLM frontier additions ───────────────────────────────────────────
+
+  glm-5.1:
+    provider: z-ai
+    family: "GLM 5"
+    released: "2026-04-07"
+    context_window: 200000
+    max_output_tokens: 16384
+    cost_per_1m_input: 0          # MIT-licensed, free if self-hosted
+    cost_per_1m_output: 0
+    license: mit
+    architecture: "744B MoE / 40B active"
+    available_via: [opencode, z-ai-api, openrouter, self-host]
+    tags: [max, heavy, premier, open-weights, oss-default]
+    task_tags: [code, code-review, review, research, writing, design, synthesis,
+                planning, reasoning, tool-use, agent, careful-long-running]
+    modality_tags: [text]
+    ratings:
+      reasoning: 5
+      code_gen: 5
+      code_read: 5
+      long_context: 4
+      instruction_following: 4
+      format_adherence: 4
+      tool_use: 4
+      speed_tokens_per_sec: 3
+      cost_efficiency: 5
+    strengths:
+      - "Frontier-class. SWE-Bench Pro 58.4 beats GPT-5.4 (57.7), Opus 4.6 (57.3), Gemini 3.1 Pro (54.2)."
+      - "MIT license; open weights enable full self-hosting."
+      - "Trusted (per user direct testimony) over Gemini for careful long-running work that requires complete analysis."
+      - "Different training lineage from US labs — strong cross-vendor reviewer pairing."
+    weaknesses:
+      - "Tool use less polished than Anthropic/OpenAI/Google API-native models."
+      - "English idiom occasionally awkward (training-corpus skew)."
+    quirks:
+      - "Fails on too-large tool calls. Prompt MUST instruct chunked writes (~50-100 lines per Write/Edit). Multiple small tool calls succeed; single large ones fail."
+    benchmarks:
+      swe_bench_pro: 0.584
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, public_benchmarks, version_research_2026_04_29, user_direct_testimony]
+    notes: "User trusts GLM 5.1 over Gemini for complex long-running analysis. Catalog primary for the 'careful-long-running' use-case chain."
+
+  glm-5:
+    provider: z-ai
+    family: "GLM 5"
+    released: "2026-02-11"
+    context_window: 128000
+    max_output_tokens: 16384
+    cost_per_1m_input: null
+    cost_per_1m_output: null
+    license: proprietary
+    architecture: "744B MoE / 40B active"
+    available_via: [z-ai-api]
+    tags: [heavy, premier]
+    task_tags: [reasoning, code, agent, tool-use]
+    modality_tags: [text]
+    quirks:
+      - "Fails on too-large tool calls. Prompt MUST instruct chunked writes."
+    notes: "Z.AI's hosted flagship. Designed for agentic tasks. GLM 5.1 is the open-weight successor."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, version_research_2026_04_29]
+
+  glm-5v-turbo:
+    provider: z-ai
+    family: "GLM 5"
+    released: "2026-04-01"
+    context_window: 128000
+    max_output_tokens: 16384
+    license: proprietary
+    available_via: [z-ai-api, opencode]
+    tags: [heavy]
+    task_tags: [vision, reasoning, multimodal]
+    modality_tags: [text, vision, multimodal]
+    quirks:
+      - "Fails on too-large tool calls. Prompt MUST instruct chunked writes."
+    notes: "Vision variant of GLM 5 line. Catalog gap — multimodal frontier from non-US lab."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, version_research_2026_04_29]
+
+  # ── Qwen3 family (the biggest catalog gap per all 3 reviewers) ──────────────
+
+  qwen3-coder-480b-a35b-instruct:
+    provider: alibaba
+    family: "Qwen3"
+    context_window: 262144
+    max_output_tokens: 65536
+    cost_per_1m_input: 0
+    cost_per_1m_output: 0
+    license: apache-2.0
+    architecture: "480B MoE / 35B active"
+    available_via: [openrouter, self-host, vllm, sglang, nvidia-nim, bedrock]
+    tags: [heavy, free, open-weights, oss-default, premier]
+    task_tags: [code, code-translation, code-review, agent, tool-use]
+    modality_tags: [text]
+    strengths:
+      - "Strongest open-weight code model in the catalog. Native 256K context, tool-calling focus."
+      - "Apache 2.0 — fully self-hostable."
+      - "Free on OpenRouter."
+      - "Per Qwen team: comparable agentic-coding to Claude Sonnet 4."
+    notes: "Becomes the new primary in the code_generation and code_translation chains. Supersedes qwen2.5-coder:32b for serious code work."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, version_research_2026_04_29, lab_review_opus, lab_review_gpt55]
+
+  qwen3-235b-a22b:
+    provider: alibaba
+    family: "Qwen3"
+    context_window: 131072
+    max_output_tokens: 32768
+    cost_per_1m_input: 0
+    cost_per_1m_output: 0
+    license: apache-2.0
+    architecture: "235B MoE / 22B active"
+    available_via: [openrouter, self-host, vllm, sglang, bedrock]
+    tags: [heavy, free, open-weights, oss-default]
+    task_tags: [reasoning, writing, multilingual, tool-use]
+    modality_tags: [text]
+    notes: "Flagship open-weight Qwen3 general MoE. Thinking and non-thinking modes."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, version_research_2026_04_29]
+
+  qwen3.6-27b:
+    provider: alibaba
+    family: "Qwen3.6"
+    released: "2026-04-22"
+    context_window: 262144
+    context_window_extended: 1010000   # YaRN extension
+    max_output_tokens: 32768
+    cost_per_1m_input: 0
+    cost_per_1m_output: 0
+    license: apache-2.0
+    architecture: "27B dense"
+    available_via: [ollama, openrouter, self-host]
+    tags: [standard, free, open-weights, offline, oss-default]
+    task_tags: [reasoning, code, writing]
+    modality_tags: [text]
+    notes: "Dense 27B Qwen3.6. Practical single-GPU choice. Apache 2.0."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, version_research_2026_04_29]
+
+  qwen3.6-35b-a3b:
+    provider: alibaba
+    family: "Qwen3.6"
+    released: "2026-04-16"
+    context_window: 262144
+    max_output_tokens: 32768
+    cost_per_1m_input: 0
+    cost_per_1m_output: 0
+    license: apache-2.0
+    architecture: "35B MoE / 3B active"
+    available_via: [ollama, openrouter, self-host]
+    tags: [standard, free, open-weights, offline, oss-default, fast]
+    task_tags: [reasoning, code, writing]
+    modality_tags: [text]
+    notes: "Extremely efficient MoE — 3B active params. Runs on consumer hardware."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, version_research_2026_04_29]
+
+  qwen3-32b:
+    provider: alibaba
+    family: "Qwen3"
+    context_window: 32768
+    max_output_tokens: 32768
+    cost_per_1m_input: 0
+    cost_per_1m_output: 0
+    license: apache-2.0
+    architecture: "32B dense"
+    available_via: [ollama, openrouter, self-host]
+    tags: [standard, free, open-weights, offline, oss-default]
+    task_tags: [reasoning, code, writing, multilingual]
+    modality_tags: [text]
+    notes: "Practical local Qwen3. Easier deployment than the 235B MoE."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  qwq-32b:
+    provider: alibaba
+    family: "QwQ"
+    context_window: 32768
+    max_output_tokens: 32768
+    license: apache-2.0
+    available_via: [ollama, openrouter, self-host]
+    tags: [heavy, free, open-weights, offline, oss-default]
+    task_tags: [reasoning, math, code]
+    modality_tags: [text]
+    notes: "Open-weight reasoning model. Brings o1-style capabilities to local 32B. Largely superseded by Qwen3 reasoning modes but still a clean reasoning baseline."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, version_research_2026_04_29]
+
+  # ── DeepSeek V4 (V3 sunsets July 2026) ──────────────────────────────────────
+
+  deepseek-v4-pro:
+    provider: deepseek
+    family: "DeepSeek V4"
+    released: "2026-04-24"
+    status: preview
+    context_window: 1000000
+    max_output_tokens: 65536
+    architecture: "1.6T total / 49B active"
+    license: deepseek-license
+    available_via: [openrouter, deepseek-api, self-host]
+    tags: [heavy, premier, open-weights]
+    task_tags: [code, reasoning, review, writing]
+    modality_tags: [text]
+    notes: "Successor to V3. V3 endpoints retire 2026-07-24."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, version_research_2026_04_29]
+
+  deepseek-v4-flash:
+    provider: deepseek
+    family: "DeepSeek V4"
+    released: "2026-04-24"
+    status: preview
+    context_window: 1000000
+    max_output_tokens: 32768
+    architecture: "284B total / 13B active"
+    license: deepseek-license
+    available_via: [openrouter, deepseek-api, self-host]
+    tags: [standard, fast, open-weights]
+    task_tags: [code, transform, classification, tool-use]
+    modality_tags: [text]
+    notes: "Cheap-tier DeepSeek V4. Fast inference."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, version_research_2026_04_29]
+
+  # ── Mistral additions ───────────────────────────────────────────────────────
+
+  mistral-small-4:
+    provider: mistral
+    family: "Mistral Small"
+    released: "2026-03-16"
+    context_window: 128000
+    max_output_tokens: 8192
+    cost_per_1m_input: 0.15
+    cost_per_1m_output: 0.45
+    license: apache-2.0
+    architecture: "119B MoE / 6B active"
+    available_via: [mistral-api, openrouter, self-host, ollama]
+    tags: [standard, fast, open-weights, oss-default]
+    task_tags: [code, reasoning, writing, transform, tool-use]
+    modality_tags: [text, vision, multimodal]
+    notes: "Merges Magistral + Pixtral + Devstral lines. Apache 2.0. Replaces deprecated Pixtral entries."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, version_research_2026_04_29]
+
+  mistral-nemo-12b:
+    provider: mistral
+    family: "Mistral Nemo"
+    context_window: 128000
+    max_output_tokens: 4096
+    license: apache-2.0
+    architecture: "12B dense (Mistral/NVIDIA collab)"
+    available_via: [mistral-api, ollama, self-host, nvidia-nim]
+    tags: [standard, free, open-weights, offline, oss-default]
+    task_tags: [writing, multilingual, tool-use]
+    modality_tags: [text]
+    notes: "Cheap-local generalist with 128K context. Apache 2.0."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  mistral-large-2:
+    provider: mistral
+    family: "Mistral Large"
+    context_window: 128000
+    max_output_tokens: 32768
+    cost_per_1m_input: 2.00
+    cost_per_1m_output: 6.00
+    license: proprietary
+    available_via: [mistral-api, openrouter]
+    tags: [heavy, subscription]
+    task_tags: [reasoning, code, writing, review]
+    modality_tags: [text]
+    notes: "Mistral's hosted flagship. Competes with mid-tier frontier models."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  # ── Phi-4 family (split from base) ──────────────────────────────────────────
+
+  phi-4-reasoning:
+    provider: microsoft
+    family: "Phi-4"
+    context_window: 32768
+    max_output_tokens: 16384
+    license: mit
+    architecture: "14B dense, reasoning-tuned"
+    available_via: [ollama, azure, self-host]
+    tags: [standard, free, open-weights, offline]
+    task_tags: [reasoning, math, code]
+    modality_tags: [text]
+    benchmarks:
+      aime_2024: 0.753
+    notes: "75.3% AIME 2024 at 14B — punches far above its weight. Distinct entry from phi-4 base."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, version_research_2026_04_29]
+
+  phi-4-multimodal:
+    provider: microsoft
+    family: "Phi-4"
+    context_window: 32768
+    max_output_tokens: 8192
+    license: mit
+    architecture: "5.6B unified multimodal"
+    available_via: [ollama, azure, self-host]
+    tags: [quick, free, open-weights, offline]
+    task_tags: [multimodal, classification, vision]
+    modality_tags: [text, vision, audio-in, multimodal]
+    notes: "Unified speech + vision + text at 5.6B. Edge-deployment specialist. MIT."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  # ── Cohere additions ────────────────────────────────────────────────────────
+
+  cohere-embed-v4:
+    provider: cohere
+    family: "Embed"
+    context_window: 128000
+    cost_per_1m_input: 0.06
+    license: proprietary
+    available_via: [cohere-api, bedrock, sagemaker, azure]
+    tags: [premier]
+    modality_tags: [embedding, vision, multimodal]
+    notes: "Cohere's flagship multimodal embedding. 128K context. Strong for mixed text/image/PDF retrieval."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  cohere-command-r-plus:
+    provider: cohere
+    family: "Command R"
+    context_window: 128000
+    max_output_tokens: 4096
+    license: cc-by-nc-4.0
+    available_via: [cohere-api, openrouter, bedrock, azure]
+    tags: [heavy, subscription]
+    task_tags: [research, writing, retrieval-augmented, tool-use]
+    modality_tags: [text]
+    notes: "RAG-optimized model with citation grounding. Strong tool-use specialist."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  # ── Embeddings & Reranking ──────────────────────────────────────────────────
+
+  jina-embeddings-v3:
+    provider: jina
+    family: "Jina Embeddings"
+    context_window: 8192
+    license: cc-by-nc-4.0
+    available_via: [jina-api, self-host]
+    tags: [standard, open-weights]
+    modality_tags: [embedding]
+    notes: "Task-specific LoRA adapters in one model. Strong multilingual."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  jina-reranker-v2-base-multilingual:
+    provider: jina
+    family: "Jina Reranker"
+    context_window: 8192
+    license: apache-2.0
+    available_via: [jina-api, self-host]
+    tags: [standard, free, open-weights, oss-default]
+    modality_tags: [reranking]
+    notes: "Open multilingual reranker. Apache 2.0."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  mixedbread-ai/mxbai-embed-large-v1:
+    provider: mixedbread
+    family: "Mixedbread"
+    context_window: 512
+    license: apache-2.0
+    available_via: [self-host, mixedbread-api, sentence-transformers]
+    tags: [standard, free, open-weights, oss-default]
+    modality_tags: [embedding]
+    notes: "Strong open English embedding. Apache 2.0. Binary quantization support."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  stella-en-1.5b-v5:
+    provider: novasearch
+    family: "Stella"
+    context_window: 8192
+    license: mit
+    available_via: [self-host, sentence-transformers]
+    tags: [standard, free, open-weights, oss-default]
+    modality_tags: [embedding]
+    notes: "Top of MTEB leaderboard for size class. MIT license."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  nomic-embed-vision-v1.5:
+    provider: nomic
+    family: "Nomic Embed"
+    context_window: 8192
+    license: apache-2.0
+    available_via: [self-host, nomic-api]
+    tags: [standard, free, open-weights, oss-default]
+    modality_tags: [embedding, vision, multimodal]
+    notes: "Multimodal embedding — text and images in same vector space. Pairs with nomic-embed-text."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  # ── Speech (audio-in) ───────────────────────────────────────────────────────
+
+  nvidia-canary-1b:
+    provider: nvidia
+    family: "Canary"
+    license: cc-by-nc-4.0
+    available_via: [nemo, self-host]
+    tags: [standard, open-weights]
+    modality_tags: [audio-in]
+    notes: "Modern ASR with speech translation. Multilingual."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  nvidia-parakeet-tdt-0.6b-v2:
+    provider: nvidia
+    family: "Parakeet"
+    license: cc-by-4.0
+    available_via: [nemo, huggingface, self-host]
+    tags: [fast, open-weights, oss-default]
+    modality_tags: [audio-in]
+    task_tags: [streaming, transcription]
+    notes: "Fast streaming-capable ASR. CTC-Transducer hybrid."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  facebook/seamless-m4t-v2-large:
+    provider: meta
+    family: "SeamlessM4T"
+    license: cc-by-nc-4.0
+    available_via: [self-host, huggingface]
+    tags: [thorough, open-weights]
+    modality_tags: [audio-in, speech-out, multimodal]
+    notes: "Speech-to-speech, speech-to-text, text-to-speech. 100+ languages. Fills translation pipeline gap."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  # ── Speech (speech-out) ─────────────────────────────────────────────────────
+
+  f5-tts:
+    provider: community
+    family: "F5-TTS"
+    license: mit
+    available_via: [self-host, huggingface, gradio]
+    tags: [standard, free, open-weights, offline, oss-default]
+    modality_tags: [speech-out]
+    notes: "Open voice-cloning TTS. Flow-matching architecture. MIT."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  xtts-v2:
+    provider: coqui
+    family: "XTTS"
+    license: coqui-public-model-license
+    available_via: [self-host, huggingface]
+    tags: [standard, open-weights, offline]
+    modality_tags: [speech-out]
+    notes: "Multilingual TTS with voice cloning. 17 languages. Coqui shut down but model is community-maintained."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  bark:
+    provider: suno
+    family: "Bark"
+    license: mit
+    available_via: [self-host, huggingface]
+    tags: [open-weights, offline]
+    modality_tags: [speech-out, audio-gen]
+    notes: "Generative audio — speech, music, sound effects. Non-deterministic by design."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  # ── Image / Video (verified entries; sdxl-lightning, pixart, cogvideox in gap-research) ──
+
+  ideogram-v3:
+    provider: ideogram
+    family: "Ideogram"
+    license: proprietary
+    available_via: [ideogram-api]
+    tags: [premier]
+    modality_tags: [image-gen]
+    notes: "Strong text rendering in images. Design/typography specialist."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  recraft-v3:
+    provider: recraft
+    family: "Recraft"
+    license: proprietary
+    available_via: [recraft-api]
+    tags: [premier]
+    modality_tags: [image-gen]
+    notes: "Vector and design-style image gen. Distinct from photoreal models."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  hidream-i1-full:
+    provider: hidream
+    family: "HiDream-I1"
+    license: open-weight
+    available_via: [self-host, huggingface, comfyui]
+    tags: [open-weights]
+    modality_tags: [image-gen]
+    notes: "Multi-LLM text encoder architecture. Strong prompt adherence."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  wan2.1-t2v-14b:
+    provider: alibaba
+    family: "Wan"
+    license: apache-2.0
+    available_via: [self-host, huggingface, modelscope, comfyui]
+    tags: [open-weights, oss-default]
+    modality_tags: [video-gen]
+    notes: "Open video generation. Apache 2.0. Strong open counter to Sora/Veo."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  mochi-1:
+    provider: genmo
+    family: "Mochi"
+    license: apache-2.0
+    available_via: [self-host, huggingface, comfyui]
+    tags: [open-weights]
+    modality_tags: [video-gen]
+    notes: "Open video generation. Apache 2.0. Strong motion."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  # ── Multimodal LLMs ─────────────────────────────────────────────────────────
+
+  llava-onevision-qwen2-72b:
+    provider: community
+    family: "LLaVA-OneVision"
+    context_window: 32768
+    max_output_tokens: 4096
+    license: apache-2.0
+    available_via: [self-host, huggingface]
+    tags: [heavy, open-weights, oss-default]
+    task_tags: [multimodal, vision]
+    modality_tags: [text, vision, multimodal]
+    notes: "Open multimodal LLM. Counter to Gemini/GPT/Claude vision dependency."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  minicpm-v-2.6:
+    provider: openbmb
+    family: "MiniCPM-V"
+    context_window: 8192
+    max_output_tokens: 4096
+    license: apache-2.0
+    available_via: [self-host, huggingface, ollama]
+    tags: [quick, fast, open-weights, offline, oss-default]
+    task_tags: [multimodal, vision]
+    modality_tags: [text, vision, multimodal]
+    notes: "Edge-class multimodal at 8B. Real-time video understanding."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  # ── Other regional / specialized ────────────────────────────────────────────
+
+  kimi-k2.5:
+    provider: moonshot
+    family: "Kimi"
+    released: "2026-01-27"
+    context_window: 1000000
+    max_output_tokens: 65536
+    license: proprietary
+    available_via: [moonshot-api]
+    tags: [heavy, premier]
+    task_tags: [reasoning, agent, code]
+    modality_tags: [text]
+    notes: "1M context. Agent Swarm feature (100 sub-agents). Strong Chinese-lab entry."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  jais-30b-chat:
+    provider: core42-mbzuai
+    family: "Jais"
+    context_window: 8192
+    max_output_tokens: 4096
+    license: custom-open
+    available_via: [self-host, huggingface]
+    tags: [open-weights]
+    task_tags: [multilingual, regional]
+    modality_tags: [text]
+    notes: "Arabic-specialized. Fills regional gap."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  tiny-aya:
+    provider: cohere
+    family: "Aya"
+    context_window: 32768
+    license: apache-2.0
+    available_via: [self-host]
+    tags: [quick, free, open-weights, offline]
+    task_tags: [multilingual, writing]
+    modality_tags: [text]
+    notes: "70+ language coverage at small size. Fills broad-multilingual gap."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+  # ── Gap-research additions (2026-04-29 second-pass research) ───────────────
+
+  openvoice-v2:
+    provider: myshell
+    family: "OpenVoice"
+    license: mit
+    available_via: [self-host, huggingface]
+    tags: [open-weights, offline]
+    modality_tags: [speech-out]
+    capabilities: ["voice cloning", "9 native languages", "zero-shot cross-lingual"]
+    notes: "Re-licensed MIT in April 2024. Voice conversion + cloning. Sample rate not authoritatively published."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, gap_research_2026_04_29]
+
+  sesame-csm:
+    provider: sesame
+    family: "Sesame CSM"
+    canonical_id: "sesame/csm-1b"
+    released: "2025-03"
+    license: apache-2.0
+    sample_rate_hz: 24000
+    architecture: "Llama backbone + Mimi RVQ codec"
+    available_via: [self-host, huggingface, transformers]
+    tags: [standard, free, open-weights, offline, oss-default]
+    modality_tags: [speech-out]
+    task_tags: [conversational]
+    notes: "Conversational Speech Model. Primarily English. In HF Transformers (>=4.52.1) as CsmForConditionalGeneration. Released March 2025 (not 2026 — earlier sources had this wrong)."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, gap_research_2026_04_29]
+
+  pixart-sigma:
+    provider: huawei-noah
+    family: "PixArt-Σ"
+    canonical_id: "PixArt-alpha/PixArt-Sigma-XL-2-1024-MS"
+    license: creativeml-open-rail-plus-plus-m
+    available_via: [self-host, huggingface, comfyui, diffusers]
+    tags: [open-weights]
+    modality_tags: [image-gen]
+    capabilities: ["512/1024/2K resolutions native", "up to 4K per paper"]
+    notes: "DiT image-gen. Multiple resolution variants. By Huawei Noah's Ark + DLUT/HKU/HKUST."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, gap_research_2026_04_29]
+
+  sdxl-lightning:
+    provider: bytedance
+    family: "SDXL Lightning"
+    canonical_id: "ByteDance/SDXL-Lightning"
+    license: creativeml-open-rail-plus-plus-m
+    available_via: [self-host, huggingface, comfyui, diffusers]
+    tags: [fast, open-weights]
+    modality_tags: [image-gen]
+    capabilities: ["1/2/4/8-step variants", "UNet and LoRA"]
+    notes: "Distilled SDXL for fast generation. Multiple step variants."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, gap_research_2026_04_29]
+
+  cogvideox-5b:
+    provider: zhipu
+    family: "CogVideoX"
+    canonical_id: "zai-org/CogVideoX-5b"
+    license: cogvideox-license
+    available_via: [self-host, huggingface, modelscope, comfyui]
+    tags: [open-weights]
+    modality_tags: [video-gen]
+    capabilities: ["720x480, 8fps, 49 frames (~6s)"]
+    notes: "Mirror at THUDM/CogVideoX-5b. CogVideoX1.5-5B is a successor with 81-frame outputs."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, gap_research_2026_04_29]
+
+  stable-video-diffusion-img2vid-xt:
+    provider: stability
+    family: "Stable Video Diffusion"
+    status: deprecated
+    successor: "stable-video-diffusion-img2vid-xt-1-1"
+    license: stable-video-diffusion-community
+    available_via: [self-host, huggingface, comfyui]
+    tags: [open-weights, deprecated]
+    modality_tags: [video-gen]
+    notes: "Deprecated by Stability — xt-1-1 (576x1024 → 1024x576, 6fps, fixed conditioning) is successor. Research/non-commercial license; commercial requires Stability membership."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, gap_research_2026_04_29]
+
+  yi-large:
+    provider: 01-ai
+    family: "Yi"
+    status: deprecated
+    successor: yi-lightning
+    superseded_date: "2024-10-16"
+    context_window: 32768
+    license: proprietary
+    available_via: [nvidia-nim, openrouter, partner-providers]
+    tags: [deprecated]
+    task_tags: [general, multilingual]
+    modality_tags: [text]
+    notes: "Yi-Lightning (MoE flagship) replaced yi-large in 2024-10. Yi-large still accessible via NVIDIA NIM and partners."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs, gap_research_2026_04_29]
+
+  # ── OpenRouter meta-router ──────────────────────────────────────────────────
+
+  openrouter/free:
+    provider: openrouter
+    family: "OpenRouter Meta-Router"
+    released: "2026-02-01"
+    license: free-tier-via-openrouter
+    available_via: [opencode]
+    tags: [free, no-rate-limit]
+    task_tags: [routing]
+    modality_tags: [text]
+    notes: "Auto-selector that routes prompts to current best free model. Useful as a fallback instrument when specific free models are throttled."
+    last_verified: "2026-04-29"
+    verified_via: [vendor_docs]
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# USE-CASE CHAINS — ranked recommendations per category
+# Open-source-first: primary picks favor open weights / free tier.
+# Subtle cross-vendor diversity in reviewer/verification chains.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+use_case_chains:
+
+  classification:
+    description: "Cheap, fast routing/labeling/triage decisions"
+    primary:
+      - zai-coding-plan/glm-4.7-flash      # free + unlimited
+      - phi-4:14b                           # local + free if user has it
+    fallback:
+      - gemini-3-flash-preview              # subscription, no rate limit
+      - claude-haiku-4-5-20251001           # subscription, paid per token
+    last_resort:
+      - claude-sonnet-4-6
+    rationale: "Open/free first; classification rarely needs frontier reasoning"
+
+  code_generation:
+    description: "Writing new code in any target language"
+    primary:
+      - qwen3-coder-480b-a35b-instruct          # NEW PRIMARY: Apache-2.0, 256K context, free OR
+      - openrouter/minimax/minimax-m2.5:free    # SWE-Bench 80.2%, FREE
+      - qwen2.5-coder:32b                        # local fallback
+    fallback:
+      - claude-sonnet-4-6                        # premier code at non-Opus cost
+      - openrouter/google/gemma-4-31b-it:free
+      - mistral-small-4                          # Apache-2.0 multimodal
+    last_resort:
+      - claude-opus-4-7
+      - gpt-5.5
+      - glm-5.1                                  # frontier-class with different blind spots
+    rationale: "Qwen3-Coder-480B is the new strongest open code model — primary for serious work. MiniMax M2.5 still leads SWE-Bench Verified at 80.2%. Reserve premium for genuinely hard code."
+
+  code_translation:
+    description: "Translating code from one language to another (e.g., port-toolkit)"
+    primary:
+      - qwen3-coder-480b-a35b-instruct          # NEW PRIMARY
+      - openrouter/minimax/minimax-m2.5:free
+      - qwen2.5-coder:32b
+      - deepseek-v4-pro                          # 1M context, replaces V3 sunsetting July 2026
+    fallback:
+      - claude-sonnet-4-6
+      - mistral-small-4
+    last_resort:
+      - claude-opus-4-7                          # 1M context as of 2026-04-16
+      - glm-5.1
+    rationale: "Code translation rewards long-context retrieval and code specialization. Qwen3-Coder native 256K context wins. DeepSeek V4 displaces V3 (V3 sunsets 2026-07-24)."
+
+  reasoning_verification:
+    description: "Multi-step deduction, math, formal verification gates"
+    primary:
+      - deepseek-r1                          # open-weight reasoning, oss-default
+      - qwq-32b                              # local Apache-2.0 reasoning
+      - phi-4-reasoning                      # 75.3% AIME at 14B, MIT, runs anywhere
+    fallback:
+      - claude-opus-4-7
+      - gemini-3.1-pro-preview
+      - glm-5.1                              # frontier reasoning, MIT
+    last_resort: []
+    note: "o4-mini deprecated as of 2026-04-29 — removed from chain."
+    rationale: "Reasoning models pay off here. Open-weight options are class-competitive. GLM 5.1 strong as cross-vendor verifier."
+
+  careful_long_running_analysis:
+    description: "Complex sustained work that requires careful, complete analysis. Multi-stage refactors, deep code review, long-form research synthesis where premature compression is the failure mode."
+    primary:
+      - glm-5.1                              # MIT, frontier; trusted by user over Gemini for this exact pattern
+    fallback:
+      - claude-opus-4-7                      # 1M context, adaptive thinking
+      - kimi-k2.5                            # 1M context, agent-swarm capable
+    last_resort:
+      - gpt-5.5                              # 1M context, expensive
+    rationale: "Per user direct testimony: GLM 5.1 outperforms Gemini for this pattern. Catalog primary even though it's an open-weight model — frontier ≡ capability tier, not vendor origin. Cite SWE-Bench Pro 58.4."
+    notes: "GLM 5.1 needs chunked-write prompt guidance — see its quirks: field. Without that the prompt fails on large outputs."
+
+  classification_at_scale:
+    description: "Batch classification of many items where rate limits matter"
+    primary:
+      - zai-coding-plan/glm-4.7-flash       # truly unlimited
+      - phi-4:14b                            # local
+    fallback:
+      - gemini-3-flash-preview
+    last_resort: []
+    rationale: "Pick rate-limit-proof options; the work is throughput-sensitive"
+
+  long_document_synthesis:
+    description: "Synthesis over very long inputs (>200K tokens)"
+    primary:
+      - gemini-3-flash-preview                  # 1M context, cheap
+      - openrouter/meta-llama/llama-4-maverick:free   # 1M context
+      - claude-opus-4-7                          # 1M context as of 2026-04-16, no premium
+      - deepseek-v4-pro                          # 1M context
+    fallback:
+      - gemini-3.1-pro-preview                   # 2M context, premium
+      - kimi-k2.5                                # 1M context, agent-swarm
+    last_resort: []
+    rationale: "Context window is the constraint. Gemini/Meta still lead at 2M; Anthropic now in the 1M club; DeepSeek V4 added the 1M open-weight."
+
+  cross_vendor_review:
+    description: "Adversarial verification — review primary work with a different vendor's eyes"
+    pattern: "Use the thinking-lab.yaml score to fan out to all five vendor families simultaneously"
+    typical_pairs:
+      - { primary: claude-opus-4-7,        reviewer: gpt-5.5 }
+      - { primary: claude-opus-4-7,        reviewer: gemini-3.1-pro-preview }
+      - { primary: claude-opus-4-7,        reviewer: glm-5.1 }
+      - { primary: gpt-5.5,                reviewer: claude-opus-4-7 }
+      - { primary: gpt-5.5,                reviewer: glm-5.1 }
+      - { primary: glm-5.1,                reviewer: claude-opus-4-7 }
+      - { primary: qwen3-coder-480b-a35b-instruct, reviewer: claude-sonnet-4-6 }
+      - { primary: openrouter/minimax/minimax-m2.5:free, reviewer: claude-sonnet-4-6 }
+    rationale: "Different training lineages have different blind spots. GLM 5.1 added as a peer reviewer (frontier-class per SWE-Bench Pro 58.4). Subtle use only — when verification matters."
+    notes: "Don't dilute by overusing. Only deploy on stages where review value beats coordination cost. GLM-as-reviewer needs chunking guidance in the prompt."
+
+  agent_loops:
+    description: "Multi-step agentic workflows with tool use and self-correction"
+    primary:
+      - openrouter/nvidia/nemotron-3-super-120b-a12b:free
+      - claude-sonnet-4-6                    # premier balance of speed and quality
+    fallback:
+      - claude-opus-4-7
+      - gpt-5.5
+    last_resort: []
+    rationale: "Agent loops eat tokens. Pay attention to per-call cost."
+
+  runner_stage:
+    description: "Mostly-deterministic CLI wrapping; needs to be cheap, reliable, no rate limits"
+    primary:
+      - cli                                  # the actual default — no LLM at all
+      - zai-coding-plan/glm-4.7-flash        # if some LLM judgment needed
+    fallback:
+      - phi-4:14b                            # local, no rate limits
+      - claude-haiku-4-5-20251001
+    last_resort: []
+    rationale: "Per The Tool Chain pattern: deterministic work doesn't need an LLM. Use cli; reach for an LLM only if real interpretation is required."
+
+  open_default_general:
+    description: "Generic 'best open-weights model for the job' default"
+    primary:
+      - qwen3-235b-a22b                      # general work, Apache-2.0
+      - qwen3.6-27b                          # local dense, Apache-2.0
+      - qwen3-coder-480b-a35b-instruct       # code-leaning
+      - glm-5.1                              # frontier, MIT
+    fallback:
+      - openrouter/minimax/minimax-m2.5:free
+      - openrouter/google/gemma-4-31b-it:free
+      - mistral-small-4                      # 119B/6B-active, Apache-2.0
+      - llama3.3:70b                         # legacy fallback
+    last_resort:
+      - claude-sonnet-4-6                    # paid fallback
+    rationale: "Open-source-first. The 2026 open-weight ecosystem (Qwen3, GLM 5.1, DeepSeek V4, Mistral Small 4) is competitive with frontier proprietary models. Reach for paid only when no open option fits."
+    notes: "Llama 3.3:70b is increasingly legacy as Llama 4 Maverick + Qwen3 + Mistral Small 4 take its slot. Demote on next refresh."
+
+  # ── Specialization chains (capability shopping) ──────────────────────────────
+
+  speech_transcription:
+    description: "Converting audio to text"
+    primary: [whisper-large-v3, nvidia-parakeet-tdt-0.6b-v2]
+    fallback: [distil-whisper-large-v3, nvidia-canary-1b]
+    note: "facebook/seamless-m4t-v2-large for translation pipelines; CC-BY-NC-4.0 license."
+    rationale: "Whisper is canonical for batch. Parakeet for streaming. Canary for ASR+translation."
+
+  speech_synthesis:
+    description: "Generating speech from text"
+    primary: [kokoro-tts, f5-tts, sesame-csm]
+    fallback: [openvoice-v2, xtts-v2, bark]
+    last_resort: [elevenlabs-v3]
+    rationale: "Open TTS ecosystem matured 2024-2026: F5-TTS (MIT, voice cloning), Sesame CSM (Apache-2.0, conversational, 24kHz, in HF Transformers), Kokoro for fast/small. Bark for sound effects + speech. ElevenLabs only when commercial-grade output is genuinely required."
+
+  image_generation:
+    description: "Generating images from text"
+    primary: [flux-schnell, flux-1-dev, sdxl-lightning]
+    fallback: [stable-diffusion-3.5-large, pixart-sigma, hidream-i1-full]
+    last_resort: [flux-1-pro, ideogram-v3, recraft-v3]
+    rationale: "Open weights cover most needs. SDXL Lightning for fast iteration; PixArt-Σ for high-resolution; Ideogram/Recraft when text rendering or vector design matters."
+    note: "imagen-3 sunset (migrate by 2026-06-30). Removed from chain."
+
+  video_generation:
+    description: "Generating video from text or images"
+    primary: [wan2.1-t2v-14b, ltx-video, mochi-1, hunyuan-video]
+    fallback: [cogvideox-5b]
+    last_resort: [veo-3, sora-2]
+    rationale: "Open weights took the lead in 2025-2026. Wan 2.1 (Apache-2.0), Mochi-1 (Apache-2.0), LTX-Video, Hunyuan, CogVideoX. Commercial APIs (Veo/Sora) only when final-render quality demands it."
+    note: "stable-video-diffusion-img2vid-xt deprecated (xt-1-1 successor). Removed from chain."
+
+  text_embeddings:
+    description: "Vectorizing text for retrieval"
+    primary: [stella-en-1.5b-v5, mixedbread-ai/mxbai-embed-large-v1, bge-large-en-v1.5, nomic-embed-text-v1.5]
+    fallback: [jina-embeddings-v3, cohere-embed-v4, voyage-3, text-embedding-3-large]
+    multimodal_primary: [nomic-embed-vision-v1.5, cohere-embed-v4]
+    rationale: "Open embeddings (Stella, Mixedbread, BGE, Nomic) match commercial managed embeddings on most retrieval. Cohere Embed v4 wins for multimodal text/image/PDF. Jina v3 for task-specific LoRA adapters."
+
+  reranking:
+    description: "Reranking retrieval candidates"
+    primary: [bge-reranker-v2-m3, jina-reranker-v2-base-multilingual]
+    fallback: [cohere-rerank-3.5]
+    rationale: "Open rerankers (BGE, Jina) cover open RAG stacks; Cohere when managed reliability is required."
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FRESHNESS POLICY
+# ═══════════════════════════════════════════════════════════════════════════════
+
+freshness:
+  catalog_check_interval_days: 30
+  musician_stale_threshold_days: 90
+  on_stale: "catalog-refresh.yaml run; thinking-lab cross-rating refresh; vendor research diff"
+  refresh_score: "scores/instrument-catalog-refresh.yaml"

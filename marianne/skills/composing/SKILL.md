@@ -27,6 +27,10 @@ Composition needs corpus vocabulary in working memory. But dumping the whole cor
 3. `scores/rosetta-corpus/selection-guide.md` — the section matching your problem type.
 4. `scores/rosetta-corpus/patterns/<name>.md` — the full file for each candidate pattern. Not a summary. Not from memory. The file itself. Pattern files carry the shape you are about to implement.
 
+**Tier 2.5 — before you select instruments:**
+
+5. `plugins/marianne/docs/ref/instrument-catalog.md` — the catalog of instruments and musicians with capability, capacity, tags, ratings, and use-case chains. The YAML at `plugins/marianne/docs/ref/instrument-catalog.yaml` is authoritative; the MD is the readable view. Without this, instrument selection is name recognition rather than tag-driven matching. The catalog encodes the open-source-first ladder: open weights primary, opencode/free fallback, subscription/premier as last resort. If your stage's use-case chain isn't obvious from the catalog, search the use-case chains section by your stage's task.
+
 **Tier 3 — on demand:**
 
 - `examples/` and `examples/patterns/` — proof scores, as reference for shape.
@@ -260,20 +264,46 @@ Don't place a boundary where:
 - Splitting would lose necessary context.
 - The boundary is symmetric, not cognitive.
 
-### Select Instruments
+### Select Instruments via Tag Intersection
 
-Different instruments — and different models within them — were built for different work. A large-context model excels at reading and synthesis. A fast model excels at mechanical tasks. A reasoning model excels at design. A CLI tool excels at deterministic operations. Match each sheet to the instrument whose purpose fits the work.
+Different instruments — and different models within them — were built for different work. The catalog at `plugins/marianne/docs/ref/instrument-catalog.{yaml,md}` is the source of truth. Marianne distinguishes:
 
-Starting from each pattern's instrument guidance, ask:
+- **Instrument** — backend execution framework (capabilities: tool use, file edit, shell, vision, MCP). Examples: `claude-code`, `gemini-cli`, `opencode`, `ollama`, `cli`.
+- **Musician** — the model played by the instrument (capacity: context, cost, speed, reasoning quality). Examples: `claude-opus-4-7`, `qwen2.5-coder:32b`, `openrouter/minimax/minimax-m2.5:free`.
 
-- What capability does this stage actually require — reasoning depth, context window, tool access, speed?
-- Where is verification needed? Verification by a different model family than production — correlated models share blind spots.
-- Where are the bottlenecks, where failure wastes the most downstream work? Strongest instrument there.
-- Is any work deterministic? That's a CLI, not an AI.
+For each stage, compute its tag intersection along four dimensions:
 
-Every assignment needs a fallback chain (`instrument_fallbacks:`) so rate limits or outages don't halt the score. Degrade gracefully: strong → capable → any that can complete the work.
+- **Tier**: `quick` / `standard` / `heavy` / `max` — how much intelligence the work warrants.
+- **Task**: `code`, `code-translation`, `classification`, `synthesis`, `runner`, etc. — what the work IS.
+- **Modality**: `text`, `vision`, `image-gen`, `audio-in`, `embedding`, etc. — what it consumes/produces.
+- **Constraint**: `cheap`, `fast`, `offline`, `no-rate-limit`, `free`, `open-weights` — what's required.
 
-**Verify availability.** `mzt instruments list` shows what is registered on this conductor. A score referencing an unregistered instrument fails at runtime, not at `mzt validate`. Prefer instruments you verified over instruments you remembered.
+Then look up the matching use-case chain in the catalog. The chain gives ranked primaries → fallbacks. **Adopt them in order.** A typical stage's `instrument:` and `instrument_fallbacks:` come straight from a chain.
+
+#### The open-source-first ladder
+
+The catalog's chains are designed around Marianne's open-source-first vision:
+
+1. **Primary picks favor open weights and free tier.** Local Qwen2.5-Coder for code translation, GLM 5 Turbo (Z.AI Coding Plan, unlimited) for runners, MiniMax M2.5 (free OpenRouter, SWE-Bench 80.2%) for code generation.
+2. **Fallback is opencode-routed free or low-cost subscription** — Gemini Flash for cheap classification, Claude Sonnet 4.6 for code work that genuinely needs frontier capability.
+3. **Premier (Opus, GPT-5.5, Gemini Pro) is the last resort** — reserved for stages where the catalog ratings genuinely warrant the cost (deep synthesis, frontier reasoning, adversarial review).
+
+Reaching for premier when the chain says open weights would suffice needs justification. Open-default reaching for premier doesn't.
+
+#### Cross-vendor verification (subtle)
+
+When a stage produces work that downstream stages will trust as ground truth, consider routing the verification step through a **different vendor lineage** than the producing step. Different training corpora produce different blind spots; correlated models share them. The catalog's `cross_vendor_review` chain enumerates typical pairs.
+
+Use sparingly. Cross-vendor diversity is leverage when verification matters. Overusing it dilutes the signal and slows iteration.
+
+For full multi-perspective review, the `scores/prep/thinking-lab.yaml` score fans out to five reviewers in parallel — Claude Opus 4.7 (Anthropic), Gemini 3.1 Pro (Google), Gemma 4 (Google free), GLM 5.1 (Z.AI), and GPT-5.5 (OpenAI) — producing independent reviews. The lab uses directory-cadenza injection of `scores/prep/thinking-lab-input/` so reviewers see the prompt and context without orchestration overhead. A calling score can chain to it via `on_success` and read the five reviews to synthesize.
+
+#### Practical reminders
+
+- Every assignment needs a fallback chain (`instrument_fallbacks:`) so rate limits or outages don't halt the score. The catalog's chains already provide one — copy it.
+- Deterministic work — running tests, building, file moves, structural greps — is `cli`, not an AI. Per The Tool Chain pattern.
+- `mzt doctor` shows what is actually installed on this conductor. A score referencing an uninstalled instrument fails at runtime, not at `mzt validate`. Prefer instruments verified over instruments remembered.
+- The catalog is refreshed by `scores/instrument-catalog-refresh.yaml`. If a musician's `last_verified` is more than 90 days old, treat its ratings with appropriate skepticism.
 
 ### Design Injections
 

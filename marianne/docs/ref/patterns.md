@@ -431,20 +431,55 @@ cross_sheet:
 
 ### Prelude & Cadenza
 
+Inject content into a sheet's prompt context. Choose **file** for one specific artifact, **directory** for a whole input bucket.
+
 ```yaml
 sheet:
-  prelude:                      # Injected into ALL sheets
+  prelude:                              # Injected into ALL sheets
     - file: "{{ workspace }}/shared-context.md"
-      as: context               # After template body
+      as: context                       # After template body
     - file: "{{ workspace }}/coding-standards.md"
-      as: skill                 # Before template body
-  cadenzas:                     # Per-sheet injections
+      as: skill                         # Before template body
+  cadenzas:                             # Per-sheet injections
     1:
       - file: "{{ workspace }}/setup.md"
         as: skill
+    2:
+      - directory: "/abs/path/to/inputs"   # ← directory cadenza
+        as: context
 ```
 
 Categories: `context` (background, after body), `skill` (methodology, before body), `tool` (actions, before body).
+
+#### File vs. directory injection
+
+Each `InjectionItem` has exactly one of `file:` or `directory:`. Setting both is a config error; setting neither is also an error.
+
+- **`file:`** — inject one file's content. Path supports Jinja templating against the score's variables.
+- **`directory:`** — glob the directory's files and inject them all. Text files are inlined. Binary files (images, PDFs, audio, etc., classified by extension) are injected as structured read instructions with absolute paths so the agent can fetch them via its own tools.
+
+#### Directory cadenzas are NOT recursive
+
+A directory cadenza globs **only the immediate children** of the directory. Subdirectories are ignored. If you need the whole tree, either flatten the input dir, or list the relevant subdirectories as separate cadenza items.
+
+```yaml
+# This injects /abs/inputs/prompt.md and /abs/inputs/code.py.
+# It does NOT inject /abs/inputs/sub/extra.md — sub/ is skipped.
+- directory: "/abs/inputs"
+  as: context
+```
+
+Common gotchas:
+
+- A README staged at the root of the input dir gets injected; a README inside `inputs/docs/` does not.
+- If you nest by mistake (e.g., `inputs/inputs/prompt.md`), the inner `prompt.md` is silently ignored — directory cadenzas only see one level.
+- Empty input dirs log a warning; the sheet still runs but reviewers see no injected content.
+
+When a recursive view is genuinely required, a small preflight stage (often `instrument: cli`) can flatten or copy a curated subtree into the directory the cadenza points at.
+
+#### Path resolution
+
+Both `file:` and `directory:` paths support Jinja templating against the score's render context (e.g., `{{ workspace }}`, user variables). Relative paths resolve against the sheet's workspace, not the score file's directory — for cadenza sources outside the workspace, use absolute paths.
 
 ### Parallel Execution
 

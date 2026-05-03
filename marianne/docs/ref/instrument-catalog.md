@@ -1,0 +1,341 @@
+# Instrument Catalog
+
+**Generated:** 2026-04-29 (v1.1 fact-fold) from `instrument-catalog.yaml`.
+**Refresh policy:** every 30 days; per-musician staleness flagged at 90 days. Run `scores/instrument-catalog-refresh.yaml`.
+**Changelog:** `CHANGELOG-instrument-catalog.md` records every fact change.
+
+> The YAML is authoritative. This markdown is a human view — read the YAML when scripting against the catalog.
+
+---
+
+## How to Read This
+
+Marianne distinguishes **instruments** from **musicians**:
+
+- **Instrument** = backend execution framework. Determines *capabilities* — tool use, file editing, shell access, vision, MCP.
+- **Musician** = the model played by the instrument. Determines *capacity* — context window, cost, speed, reasoning quality.
+
+Composers select tag intersections (`tier × task × modality × constraint`) and the catalog maps the intersection to ranked model chains. **Open-source-first by default**; subscription and premier as fallbacks where open models genuinely don't suffice. Frontier ≡ capability tier, not vendor origin: GLM 5.1 (Z.AI, MIT-licensed) sits at `max` tier alongside Opus, GPT-5.5, and Gemini Pro.
+
+---
+
+## Tag Dimensions
+
+| Dimension | Tags |
+|---|---|
+| **Tier** | `quick`, `standard`, `heavy`, `max` |
+| **Task** | `code`, `code-translation`, `code-review`, `review`, `research`, `writing`, `transform`, `design`, `classification`, `synthesis`, `planning`, `reasoning`, `math`, `tool-use`, `agent`, `careful-long-running`, `multilingual`, `regional`, `retrieval-augmented`, `transcription`, `streaming`, `conversational`, `routing`, `general`, `vision` |
+| **Modality** | `text`, `vision`, `image-gen`, `audio-in`, `speech-out`, `video-gen`, `audio-gen`, `embedding`, `reranking`, `multimodal` |
+| **Constraint** | `cheap`, `fast`, `thorough`, `offline`, `no-rate-limit`, `free`, `open-weights`, `subscription`, `premier`, `oss-default`, `deprecated`, `sunset` |
+
+---
+
+## Instruments
+
+| Instrument | Auth | Capabilities | Notes |
+|---|---|---|---|
+| `claude-code` | Anthropic sub or API | tool_use, file_edit, shell, web_fetch, MCP, vision | Full agentic capability |
+| `anthropic_api` | Anthropic API | tool_use, vision | Same models without CLI shell |
+| `gemini-cli` | Google sub or API | tool_use, file_edit, shell, vision, multimodal | Strong native multimodal |
+| `codex-cli` | OpenAI Plus or API | tool_use, file_edit, shell, vision | GPT-5.5 access via Plus subscription |
+| `opencode` | per-provider | tool_use, file_edit, shell, multi_provider | Best route to OpenRouter free tier and Z.AI Coding Plan |
+| `aider` | per-provider | tool_use, file_edit, git, shell, multi_provider | Strong git integration |
+| `goose` | per-provider | tool_use, file_edit, shell, MCP, multi_provider | Block.xyz; MCP-strong |
+| `crush` | per-provider | tool_use, terminal_ui, multi_provider | Charm.land TUI |
+| `ollama` | none | local, offline, no_rate_limit, partial tool use | **Open-source-first default for local work** |
+| `recursive_light` | (specialized) | tdf_judgment, boundary_analysis | Selective use only |
+| `cli` | none | shell, deterministic | Plain bash; cheapest option per The Tool Chain |
+
+---
+
+## Musicians by Family
+
+### Anthropic — Claude 4
+
+| Model | Context | Cost in/out (per 1M) | Tags | Status |
+|---|---:|---|---|---|
+| `claude-opus-4-7` | **1M** (released 2026-04-16) | $15 / $75 | max, premier | current |
+| `claude-sonnet-4-6` | 200K (1M beta) | $3 / $15 | heavy, standard | current |
+| `claude-haiku-4-5-20251001` | 200K | $0.80 / $4 | quick, fast | current |
+
+### OpenAI
+
+| Model | Context | Cost in/out | Tags | Status |
+|---|---:|---|---|---|
+| `gpt-5.5` | 1M (256K Codex mode) | $5 / $30 base, $30 / $180 Pro | max, premier | current (released 2026-04-24) |
+| `gpt-5` | 200K | $2.50 / $10 | heavy, **deprecated** | retired from ChatGPT 2026-02-13 |
+| `o4-mini` | 128K | $1.10 / $4.40 | reasoning, **deprecated** | fully deprecated |
+
+### Google — Gemini 3
+
+| Model | Context | Cost in/out | Tags | Status |
+|---|---:|---|---|---|
+| `gemini-3.1-pro-preview` | 2M | $2.50 / $10 | max | preview |
+| `gemini-3-flash-preview` | 1M | $0.30 / $1.20 | quick, fast | preview |
+| `gemini-2.5-pro` | 2M | $1.25 / $5 | heavy, **deprecating** | deprecates 2026-06-17 (API), 2026-10-16 (Vertex) |
+
+### Z.AI — GLM (frontier-class, MIT-licensed for 5.1)
+
+| Model | Context | Cost | Tags | Status |
+|---|---:|---|---|---|
+| **`glm-5.1`** | **200K** | free (MIT) | **max, premier, open-weights, oss-default** | **frontier — SWE-Bench Pro 58.4 beats GPT-5.4, Opus 4.6, Gemini 3.1 Pro.** Released 2026-04-07. **Trusted by user over Gemini for careful long-running analysis.** ⚠ Quirk: must chunk tool calls. |
+| `glm-5` | 128K | hosted | heavy, premier | Z.AI flagship hosted |
+| `glm-5v-turbo` | 128K | hosted | heavy | Vision variant of GLM 5 (released 2026-04-01) |
+| `zai-coding-plan/glm-5-turbo` | 131K | free (Coding Plan) | standard, no-rate-limit | ⚠ Quirk: chunk tool calls |
+| `zai-coding-plan/glm-4.7-flash` | 131K | free (Coding Plan) | quick, fast | ⚠ Quirk: chunk tool calls |
+| `openrouter/z-ai/glm-4.5-air:free` | 131K | free OR | standard, open-weights | ⚠ Quirk: chunk tool calls |
+
+> **GLM tool-call chunking quirk**: GLM models fail on too-large single tool calls. Prompts targeting GLM **must** instruct chunked writes (~50–100 lines per Write/Edit). Multiple small calls succeed; single large ones fail.
+
+### Alibaba — Qwen3 family (the biggest 2026 catalog gap, now filled)
+
+| Model | Context | License | Notes |
+|---|---:|---|---|
+| `qwen3-coder-480b-a35b-instruct` | **256K** | Apache-2.0 | Strongest open-weight code model. **New primary** in code generation/translation chains. |
+| `qwen3-235b-a22b` | 131K | Apache-2.0 | Flagship general MoE. |
+| `qwen3.6-27b` | 262K → 1M YaRN | Apache-2.0 | Released 2026-04-22, dense, single-GPU friendly. |
+| `qwen3.6-35b-a3b` | 262K | Apache-2.0 | Released 2026-04-16, MoE 3B-active, runs on consumer hardware. |
+| `qwen3-32b` | 32K | Apache-2.0 | Practical local Qwen3. |
+| `qwq-32b` | 32K | Apache-2.0 | Open-weight reasoning (o1-style). |
+| `qwen2.5-coder:32b` | 131K | Apache-2.0 | Local code specialist (legacy after Qwen3-Coder). |
+
+### DeepSeek
+
+| Model | Context | License | Status |
+|---|---:|---|---|
+| `deepseek-v4-pro` | **1M** | DeepSeek license | preview (released 2026-04-24); 1.6T MoE / 49B active |
+| `deepseek-v4-flash` | 1M | DeepSeek license | preview; 284B / 13B active |
+| `deepseek-v3` | 128K | open-weight | **deprecating** — endpoints retire 2026-07-24 |
+| `deepseek-r1` | 128K | MIT | open-weight reasoning |
+
+### Mistral
+
+| Model | Context | License | Notes |
+|---|---:|---|---|
+| `mistral-small-4` | 128K | Apache-2.0 | Released 2026-03-16, 119B/6B-active, multimodal — merges Magistral+Pixtral+Devstral |
+| `mistral-nemo-12b` | 128K | Apache-2.0 | Cheap local generalist |
+| `mistral-large-2` | 128K | proprietary | Mistral hosted flagship |
+| `codestral:22b` | 32K | open | Code specialist |
+
+### Microsoft — Phi-4
+
+| Model | Context | License | Notes |
+|---|---:|---|---|
+| `phi-4-reasoning` | 32K | MIT | 14B with thinking blocks, 75.3% AIME 2024 |
+| `phi-4-multimodal` | 32K | MIT | 5.6B unified speech+vision+text |
+| `phi-4:14b` | 16K | MIT | Base 14B model |
+
+### Other notable LLMs
+
+| Model | Context | Notes |
+|---|---:|---|
+| `cohere-command-r-plus` | 128K | RAG-optimized with citation grounding (CC-BY-NC-4.0) |
+| `kimi-k2.5` | 1M | Moonshot, Agent Swarm (100 sub-agents). 2026-01-27. |
+| `llama3.3:70b` | 128K | Legacy — Llama 4 Maverick supersedes |
+| `openrouter/meta-llama/llama-4-maverick:free` | 1M | Free OR |
+| `openrouter/google/gemma-4-31b-it:free` | 262K | Free OR |
+| `openrouter/minimax/minimax-m2.5:free` | 196K | SWE-Bench Verified 80.2%; M2.7 successor exists |
+| `openrouter/nvidia/nemotron-3-super-120b-a12b:free` | 262K | Free OR |
+| `jais-30b-chat` | 8K | Arabic-specialized |
+| `tiny-aya` | 32K | Cohere, 70+ languages |
+| `yi-large` | 32K | **deprecated** as flagship — Yi-Lightning replaced 2024-10-16 |
+| `openrouter/free` | meta | OpenRouter auto-router for free models (released 2026-02-01) |
+
+### Multimodal (text + vision)
+
+| Model | License | Notes |
+|---|---|---|
+| `llava-onevision-qwen2-72b` | Apache-2.0 | Open multimodal at 72B |
+| `minicpm-v-2.6` | Apache-2.0 | Edge-class, 8B, real-time video understanding |
+
+### Embeddings
+
+| Model | License | Notes |
+|---|---|---|
+| `stella-en-1.5b-v5` | MIT | Top of MTEB at size class |
+| `mixedbread-ai/mxbai-embed-large-v1` | Apache-2.0 | Binary quantization support |
+| `bge-large-en-v1.5` | open | English baseline |
+| `nomic-embed-text-v1.5` | Apache-2.0 | Long-context emphasis |
+| `nomic-embed-vision-v1.5` | Apache-2.0 | Multimodal |
+| `jina-embeddings-v3` | CC-BY-NC-4.0 | Task-specific LoRAs |
+| `cohere-embed-v4` | proprietary | Multimodal, 128K context |
+| `voyage-3` | proprietary | Domain variants |
+| `text-embedding-3-large` | proprietary | OpenAI flagship |
+
+### Reranking
+
+| Model | License | Notes |
+|---|---|---|
+| `bge-reranker-v2-m3` | open | Multilingual |
+| `jina-reranker-v2-base-multilingual` | Apache-2.0 | Open multilingual |
+| `cohere-rerank-3.5` | proprietary | Premier managed |
+
+### Speech (audio-in)
+
+| Model | License | Notes |
+|---|---|---|
+| `whisper-large-v3` | open | Canonical batch ASR |
+| `distil-whisper-large-v3` | open | Fast English variant |
+| `nvidia-canary-1b` | CC-BY-NC-4.0 | Multilingual ASR + translation |
+| `nvidia-parakeet-tdt-0.6b-v2` | CC-BY-4.0 | Streaming-capable |
+| `facebook/seamless-m4t-v2-large` | CC-BY-NC-4.0 | Speech-to-speech translation |
+
+### Speech (speech-out)
+
+| Model | License | Notes |
+|---|---|---|
+| `kokoro-tts` | open | Fast small open TTS |
+| `f5-tts` | MIT | Voice cloning, flow-matching |
+| `sesame-csm` | Apache-2.0 | Conversational, 24kHz, in HF Transformers (released March 2025) |
+| `openvoice-v2` | MIT | Voice cloning, 9 + zero-shot languages |
+| `xtts-v2` | Coqui Public Model License | 17 languages |
+| `bark` | MIT | Generative audio + speech + sound effects |
+| `elevenlabs-v3` | proprietary | Premier commercial TTS |
+
+### Image generation
+
+| Model | License | Notes |
+|---|---|---|
+| `flux-1-pro` | proprietary | Premier |
+| `flux-1-dev`, `flux-schnell` | open-weight | Open Flux variants |
+| `stable-diffusion-3.5-large` | open | Stability flagship |
+| `pixart-sigma` | CreativeML OpenRAIL++-M | 512/1024/2K resolutions |
+| `sdxl-lightning` | CreativeML OpenRAIL++-M | 1/2/4/8-step variants |
+| `hidream-i1-full` | open-weight | Multi-LLM text encoder |
+| `ideogram-v3` | proprietary | Text rendering specialist |
+| `recraft-v3` | proprietary | Vector/design |
+| `imagen-3` | proprietary | **sunset** — migrate by 2026-06-30 |
+
+### Video generation
+
+| Model | License | Notes |
+|---|---|---|
+| `wan2.1-t2v-14b` | Apache-2.0 | Open T2V |
+| `mochi-1` | Apache-2.0 | Open T2V |
+| `cogvideox-5b` | CogVideoX license | 720x480 / 8fps / 6s |
+| `hunyuan-video` | open-weight | Open T2V |
+| `ltx-video` | open-weight | Fast open video |
+| `stable-video-diffusion-img2vid-xt` | Stability community | **deprecated** (xt-1-1 successor) |
+| `veo-3` | proprietary | Google premier |
+| `sora-2` | proprietary | OpenAI premier |
+
+---
+
+## Use-Case Chains
+
+Open-source-first ranking. `→` = fallback ladder.
+
+### Code generation
+1. `qwen3-coder-480b-a35b-instruct` (Apache-2.0, 256K)
+2. `openrouter/minimax/minimax-m2.5:free` (SWE-Bench 80.2%)
+3. `qwen2.5-coder:32b` (local)
+→ `claude-sonnet-4-6`, `mistral-small-4`, `openrouter/google/gemma-4-31b-it:free`
+→ last resort: `claude-opus-4-7`, `gpt-5.5`, `glm-5.1`
+
+### Code translation (port-toolkit-style)
+1. `qwen3-coder-480b-a35b-instruct`, `openrouter/minimax/minimax-m2.5:free`, `qwen2.5-coder:32b`, `deepseek-v4-pro`
+→ `claude-sonnet-4-6`, `mistral-small-4`
+→ last resort: `claude-opus-4-7`, `glm-5.1`
+
+### Reasoning verification
+1. `deepseek-r1`, `qwq-32b`, `phi-4-reasoning`
+→ `claude-opus-4-7`, `gemini-3.1-pro-preview`, `glm-5.1`
+
+### **Careful long-running analysis** (NEW chain)
+1. **`glm-5.1`** — primary per user direct testimony
+→ `claude-opus-4-7`, `kimi-k2.5`
+→ last resort: `gpt-5.5`
+
+### Long-document synthesis (>200K tokens)
+1. `gemini-3-flash-preview` (1M, cheap), `openrouter/meta-llama/llama-4-maverick:free` (1M), `claude-opus-4-7` (1M now), `deepseek-v4-pro` (1M)
+→ `gemini-3.1-pro-preview` (2M), `kimi-k2.5` (1M)
+
+### Classification
+1. `zai-coding-plan/glm-4.7-flash`, `phi-4:14b`
+→ `gemini-3-flash-preview`, `claude-haiku-4-5-20251001`
+
+### Cross-vendor review (subtle)
+
+Use `scores/prep/thinking-lab.yaml` for full 5-vendor fan-out. Typical pairs:
+
+- `claude-opus-4-7` ↔ `gpt-5.5`, `gemini-3.1-pro-preview`, **`glm-5.1`**
+- `gpt-5.5` ↔ `claude-opus-4-7`, `glm-5.1`
+- `glm-5.1` ↔ `claude-opus-4-7`
+- `qwen3-coder-480b-a35b-instruct` ↔ `claude-sonnet-4-6`
+
+> GLM-as-reviewer needs chunking guidance in prompt.
+
+### Agent loops
+1. `openrouter/nvidia/nemotron-3-super-120b-a12b:free`, `claude-sonnet-4-6`
+→ `claude-opus-4-7`, `gpt-5.5`, `kimi-k2.5`
+
+### Runner stage (mostly deterministic)
+1. **`cli`** — the actual default
+2. `zai-coding-plan/glm-4.7-flash` — if some LLM judgment needed
+→ `phi-4:14b`, `claude-haiku-4-5-20251001`
+
+### Open-default general
+1. `qwen3-235b-a22b`, `qwen3.6-27b`, `qwen3-coder-480b-a35b-instruct`, `glm-5.1`
+→ `openrouter/minimax/minimax-m2.5:free`, `openrouter/google/gemma-4-31b-it:free`, `mistral-small-4`, `llama3.3:70b` (legacy)
+→ last resort: `claude-sonnet-4-6`
+
+### Speech transcription
+Primary: `whisper-large-v3`, `nvidia-parakeet-tdt-0.6b-v2`
+Fallback: `distil-whisper-large-v3`, `nvidia-canary-1b`, `facebook/seamless-m4t-v2-large` (translation pipelines)
+
+### Speech synthesis
+Primary: `kokoro-tts`, `f5-tts`, `sesame-csm`
+Fallback: `openvoice-v2`, `xtts-v2`, `bark`
+Last resort: `elevenlabs-v3`
+
+### Image generation
+Primary: `flux-schnell`, `flux-1-dev`, `sdxl-lightning`
+Fallback: `stable-diffusion-3.5-large`, `pixart-sigma`, `hidream-i1-full`
+Last resort: `flux-1-pro`, `ideogram-v3`, `recraft-v3`
+
+### Video generation
+Primary: `wan2.1-t2v-14b`, `ltx-video`, `mochi-1`, `hunyuan-video`
+Fallback: `cogvideox-5b`
+Last resort: `veo-3`, `sora-2`
+
+### Text embeddings
+Primary: `stella-en-1.5b-v5`, `mixedbread-ai/mxbai-embed-large-v1`, `bge-large-en-v1.5`, `nomic-embed-text-v1.5`
+Fallback: `jina-embeddings-v3`, `cohere-embed-v4`, `voyage-3`, `text-embedding-3-large`
+Multimodal: `nomic-embed-vision-v1.5`, `cohere-embed-v4`
+
+### Reranking
+Primary: `bge-reranker-v2-m3`, `jina-reranker-v2-base-multilingual`
+Fallback: `cohere-rerank-3.5`
+
+---
+
+## Composer Workflow
+
+1. **Identify the stage's task** — code translation, classification, synthesis, runner, etc.
+2. **Identify hard constraints** — must-be-offline? long-context? rate-limit-proof? large output (mind GLM chunking)?
+3. **Look up the matching use-case chain.** The chain gives ranked primaries → fallbacks.
+4. **Map to YAML** — set `instrument:` to the recommended primary's instrument; set `cli_model:` to the musician id; set `instrument_fallbacks:` to the fallback chain.
+5. **Justify any deviation.** If reaching for premier when the chain says open weights would suffice, document why. Marianne's open-source-first ethos puts the burden of proof on premier picks.
+6. **For GLM-routed stages**, add chunking guidance: "Write your output in chunks of ~50–100 lines per Write/Edit; multiple small tool calls succeed where single large ones fail."
+
+---
+
+## Refresh
+
+The catalog is a snapshot. Run `scores/instrument-catalog-refresh.yaml`:
+
+1. Probe currently-installed instruments (`mzt doctor`)
+2. Web-research vendor releases since `last_verified`
+3. Scan OpenRouter / Hugging Face for new free-tier models
+4. Run thinking-lab cross-rating on the changeset (with chunking guidance for GLM)
+5. Diff against current catalog
+6. Write a versioned update with citations
+
+Recommended cadence: monthly. Auto-staleness flag at 90 days per musician.
+
+## v1.1 deferred items
+
+- **Gemma 4 + GLM 5.1 ratings** — lab pass deferred (Gemma timed out, GLM hit chunking quirk). Re-run with chunking guidance baked in.
+- **Yi family rationalization** — Yi-Lightning vs Yi-1.5/2.0 etc.
+- **stable-video-diffusion-img2vid-xt-1-1** — successor entry not yet drafted.
+- **MiniMax M2.7** — exists per version research; M2.5 may shift.
