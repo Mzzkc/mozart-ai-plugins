@@ -38,8 +38,8 @@ and refusal conditions, downstream consumer, and the path by which changed
 evidence reopens the decision. Omit unrelated history, not load-bearing
 authority.
 
-**Required response rule:** A direction that mentions even a conditional split,
-recast, or cancellation must enumerate every authority field in its response.
+**Required response rule:** A direction proposing even a conditional transfer by split or
+recast must enumerate every authority field in its response.
 Do not compress roots and inputs into generic constraints. For unavailable
 values, write `unknown — owner` so the missing identity is an explicit blocker.
 
@@ -77,6 +77,20 @@ for each shared contract, define write and consumption rules, prevent unsafe
 concurrent mutation, and verify that downstream behavior changed. A shared
 directory is a coordination substrate only when musicians actually read and
 update its governed signals.
+
+## Make steering observable
+
+Separate immutable admission from mutable working direction. Publish one exact
+active path and archive superseded directives; deliver only phase-relevant write
+instructions. Prove entry delivery, subsequent physical reads, and changed
+behavior separately. A requested milestone reread is voluntary polling, not a
+verified in-flight message or stop guarantee.
+
+For child-submission loops, require an actually checked stop/attempt state at
+each admission, unique attempt identities, bounded attempts, and preserved inner
+exits. Verify the runtime mechanism before claiming enforcement. If unavailable,
+use bounded execution boundaries and explicit cancellation. Stop violating owned
+work promptly; parent cancellation does not establish child termination.
 
 ## Adoption checkpoint
 
@@ -128,13 +142,15 @@ the performance: commission parallel non-colliding product work that cannot
 consume or expose the blocked capability, and monitor exception signals rather
 than serially inspecting every artifact the waiting lane produces.
 
-Before split, recast, or cancellation becomes active, attach the authority brief
+Before split or recast transfers ownership, attach the authority brief
 to the handoff. Admission requires the observable outcome and non-goals, exact
 subject, concrete authoritative roots separated into writable and read-only
 authority, exact immutable input identities, known disagreements, proof and
 refusal conditions, downstream consumer, and reevaluation path. Generic labels are not evidence;
 cite the governed identities or hold the transfer.
-Even a conditional transfer must enumerate the receipt in the current
+Emergency pause or cancellation must not wait for a ceremonial receipt: stop
+within existing authority, preserve evidence, verify owned child settlement,
+and record the action afterward. Even a conditional transfer must enumerate the receipt in the current
 direction. Unknown fields are blockers: name each missing identity and its
 owner rather than omitting the field until recast.
 
@@ -151,6 +167,28 @@ The conductor's attention is scarce. Restore useful work to idle experts,
 delegate observation, and avoid becoming the slowest serial worker in a
 parallel system. If no valuable assignment exists, pause or release the excess
 capacity. Never manufacture utilization to make the orchestra look busy.
+
+## Measure the complete conducting loop
+
+Calibrate budgets from observed input volume, first useful artifact, tool/suite
+runtime, and terminal handoff. Reserve time for the actual receipt consumer.
+First tool, headings-only scaffold, and collection failure are distinct from a
+useful decision, behavioral proof, or completed handoff. Before diagnosing model
+inactivity, inspect owned running tools and descendants. Quiet time alone proves
+neither queueing nor quota exhaustion; inspect timing/usage metadata, not private
+reasoning content.
+
+In the existing record, capture change, retained quality checks, observed result,
+and next adjustment. Include preparation, ready-to-dispatch queue, recovery setup,
+root attention, and whole elapsed time alongside model time. Smaller initial
+briefs can relocate reading; retained history is still context. Record exposed
+usage fields with their event scope; zeros and cache hits are not billing or
+quota savings. Label proposed ceilings and unmatched comparisons honestly.
+
+Use one event/deadline observer per lane and grouped outcome records. Read settled
+reports once; reread changed boundaries. Budget both nested and outer tool output;
+extract bounded bytes or structured fields because one log line can be enormous.
+Keep mandatory orientation complete and record already-read sources precisely.
 
 ## Status judgment
 

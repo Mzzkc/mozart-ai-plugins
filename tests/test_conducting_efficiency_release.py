@@ -39,6 +39,17 @@ EFFICIENCY_SCENARIOS = {
     "recurring-domain-steward",
     "redundant-review-oracle",
     "green-without-organic-evidence",
+    "assurance-recursion",
+    "capability-denominator",
+    "vertical-vs-horizontal",
+    "status-andon-wait-pairing",
+    "successful-child-failed-wrapper",
+    "retained-author-timeout",
+    "construction-awaits-qualification",
+    "unread-stop-child-loop",
+    "prompt-economy-claim",
+    "baseline-green-and-handoff",
+    "breaker-existing-authority",
 }
 
 EFFICIENCY_CATEGORIES = {
@@ -113,8 +124,8 @@ def test_efficiency_suite_covers_domains_and_task_sizes() -> None:
 
 def test_truthful_convergence_release_metadata_and_closed_manifest() -> None:
     version = (ROOT / "VERSION").read_text(encoding="utf-8")
-    assert "version: 1.2.0" in version
-    assert "doctrine: truthful-convergence-2026-08-28" in version
+    assert "version: 1.4.0" in version
+    assert "doctrine: measured-conducting-2026-09-11" in version
 
     manifest = load_script(
         "marianne/skills/conducting/scripts/release_manifest.py",
@@ -226,7 +237,7 @@ def test_authority_receipts_are_admission_gates() -> None:
         encoding="utf-8"
     )
     for phrase in (
-        "before split, recast, or cancellation becomes active",
+        "before split or recast transfers ownership",
         "concrete authoritative roots",
         "exact immutable input identities",
         "generic labels are not evidence",
@@ -235,6 +246,7 @@ def test_authority_receipts_are_admission_gates() -> None:
         "must enumerate every authority field in its response",
         "do not compress roots and inputs into generic constraints",
         "every consequential directive carries an authority receipt",
+        "emergency pause or cancellation must not wait",
         "unchanged — orientation snapshot ref",
         "fields are never omitted",
     ):

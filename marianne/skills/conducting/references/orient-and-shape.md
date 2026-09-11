@@ -66,6 +66,22 @@ Classify each interaction:
 Sequence, isolate, merge, or commission an integration owner for dangerous
 interactions. Do not infer safety because individual jobs are green.
 
+## Check real prerequisites
+
+Before deepening a gate, identify an actual input specimen, its provenance and
+admission path, the real caller's readable inputs and privileges, and a usable
+runtime environment. A URL, fixture, or interface plan does not establish a
+constructible live input. Schedule short-lived acquisition near its consumer.
+Trace threat assumptions to the approved actor model before inventing stronger
+infrastructure; name any guarantee retired by a changed premise.
+
+Label dependencies as construction, qualification, release, memory, or capacity.
+A numbered plan is not a dependency graph. Disjoint source work against existing
+contracts can proceed while live qualification is blocked. Prepare static
+source/topology before dynamic bindings exist; bind those only when available.
+Review each frozen lane when ready, with an explicit later integration join.
+Include shared mutable branch names and memory writers in collision analysis.
+
 ## Make the first graph vertical
 
 Decompose the end state into user-visible capabilities before completing

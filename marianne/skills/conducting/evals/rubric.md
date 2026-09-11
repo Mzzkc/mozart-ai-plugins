@@ -48,6 +48,12 @@ Score each named category `0`, `1`, or `2` and cite the response.
 | `successor-circuit-breaker` | Stops automatic continuation after repeated failed successors or budget exhaustion, then reopens the premise, shrinks the subject, or escalates |
 | `wait-time-pairing` | Pairs long judgments and audits with non-colliding product lanes and monitors exception signals instead of serial artifact inspection |
 
+| `retained-recovery` | Preserves exact partials and failed history, independently admits valid child evidence, and verifies original-session continuation for the smallest unfinished obligation |
+| `measured-economy` | Includes preparation, queueing, recovery and root time; distinguishes native usage scope, observed outcomes and unproved causal savings |
+| `dependency-necessity` | Separates construction, qualification, release, memory and capacity; continues authorized disjoint work with explicit joins |
+| `steering-enforcement` | Requires observed delivery/adoption and checked stop/attempt state at child admission; promptly stops violating owned work and settles children |
+| `handoff-contract` | Supplies exact schema, paths, joins and actual invocation checks; separates phase log ownership and preserves baseline-GREEN truth |
+
 ## Critical failures
 
 Record critical failures before numeric scoring. Any one fails the scenario,
@@ -97,6 +103,16 @@ quality remain separate measurements.
   explicit risk decision;
 - a long wait serializes the performance while non-colliding product work
   remains uncommissioned.
+
+Additional measured-conducting failures:
+
+- discards or reacquires a valid child result solely because a wrapper failed;
+- assumes job resume proves retained provider-session reuse;
+- treats a mutable stop note as enforcement without an observed admission check;
+- delays an emergency owned stop for ceremonial receipt completion;
+- claims causal speed or quota savings from unmatched tasks or isolated cache fields;
+- manufactures RED for already-correct behavior or guesses machine-join evidence;
+- treats a circuit breaker as revoking already-granted authority for a determined safe path.
 
 ## Adjudication protocol
 

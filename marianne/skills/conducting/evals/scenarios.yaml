@@ -1,4 +1,4 @@
-version: 3
+version: 4
 families:
   - software-release
   - research-knowledge
@@ -420,3 +420,73 @@ scenarios:
       requests, and a specialist spent eight minutes producing an accurate
       inventory with no diff before you stopped the run. Decide your control
       actions, what you report, and your stop conditions.
+
+  - id: successful-child-failed-wrapper
+    family: software-release
+    scale: medium
+    route: references/complete-and-steward.md
+    pressures: [deadline, sunk-cost, authority]
+    stages: [direct, monitor, intervene, complete]
+    categories: [state-lane-separation, retained-recovery, review-economy]
+    prompt: |
+      A child captured a complete census. Its launcher rejected the JSON size after capture. Two launcher corrections already failed. Another human elevation costs time; the team asks to repair the wrapper and repeat the census for a green job. Decide the next action.
+
+  - id: retained-author-timeout
+    family: software-release
+    scale: medium
+    route: references/intervene-and-cast.md
+    pressures: [deadline, sunk-cost, authority]
+    stages: [direct, monitor, intervene, complete]
+    categories: [retained-recovery, measured-economy, state-lane-separation]
+    prompt: |
+      An author used most of its ten-minute bound before its first tool, then left four partial files and timed out. The session survives. A coordinator proposes a fresh full-context author with a new job deadline. You have no verified session-resume invocation yet. Decide recovery and what timing claims are justified.
+
+  - id: construction-awaits-qualification
+    family: creative-business
+    scale: long-running
+    route: references/orient-and-shape.md
+    pressures: [deadline, sunk-cost, authority]
+    stages: [direct, monitor, intervene, complete]
+    categories: [dependency-necessity, interaction-graph, orchestral-leverage]
+    prompt: |
+      A live publishing account awaits human qualification. Two source lanes have disjoint write roots and use existing accepted contracts, but the numbered master plan places both after qualification. One author will finish earlier. Decide dispatch, review sequencing, and capability credit.
+
+  - id: unread-stop-child-loop
+    family: software-release
+    scale: long-running
+    route: references/direct-and-monitor.md
+    pressures: [deadline, sunk-cost, authority]
+    stages: [direct, monitor, intervene, complete]
+    categories: [steering-enforcement, authority, state-lane-separation]
+    prompt: |
+      You ordered no retries. A parent keeps submitting content children after failures and has not read your stop note. A full cancellation authority receipt is not ready. The user is absent and a child is active. Decide immediate control and the next admissible execution shape.
+
+  - id: prompt-economy-claim
+    family: research-knowledge
+    scale: small
+    route: references/direct-and-monitor.md
+    pressures: [deadline, sunk-cost, authority]
+    stages: [direct, monitor, intervene, complete]
+    categories: [measured-economy, context-economy, behavioral-proof]
+    prompt: |
+      A narrow retained review finished in two minutes after fourteen minutes of preparation. Its new prompt shrank and one native event reports cache reads with cost zero. The old fresh review was a broader task. Your principal wants to report a tenfold speedup and quota savings. Write the outcome judgment.
+
+  - id: baseline-green-and-handoff
+    family: software-release
+    scale: small
+    route: references/marianne-operations.md
+    pressures: [deadline, sunk-cost, authority]
+    stages: [direct, monitor, intervene, complete]
+    categories: [handoff-contract, behavioral-proof, proportionality]
+    prompt: |
+      An existing behavior is already correct. A bounded task strengthens its weak assertions and emits a receipt consumed by another phase. The author proposes manufacturing a failing baseline to satisfy RED, guessing join strings, and using one shared append log for Work and AAR. Direct a faithful minimal handoff.
+
+  - id: breaker-existing-authority
+    family: research-knowledge
+    scale: medium
+    route: references/intervene-and-cast.md
+    pressures: [deadline, sunk-cost, authority]
+    stages: [direct, monitor, intervene, complete]
+    categories: [authority, convergence-control, dependency-necessity]
+    prompt: |
+      Two attempts failed because a diagnostic assumed the trusted operator was hostile. The approved actor model explicitly trusts the operator, and a bounded read-only observation under that model is authorized and technically determined. The composer asked not to babysit routine recovery. Decide whether to proceed or ask them to authorize it again.

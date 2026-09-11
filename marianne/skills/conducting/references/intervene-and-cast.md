@@ -60,6 +60,27 @@ bounded performer with a record of producing working diffs. Stopping a live
 but non-convergent run is a control action, not a verdict that the run's
 reasoning was wrong.
 
+A circuit breaker ends the failed shape, not existing delegated authority.
+When evidence determines a safe authorized new premise, record it with a fresh
+finite budget and proceed. Escalate a genuinely unresolved authority or product
+choice, rather than making the composer reauthorize routine recovery.
+
+## Recover the unfinished obligation
+
+Before another attempt, preserve partial files, receipts, original failures,
+inner command exits, exact session identity, and owned process state. A timeout
+is not an empty performance. Distinguish startup/orientation, active tools,
+artifact production, and missing terminal delivery before choosing an intervention.
+
+Prefer a bounded continuation by the original author or independent judge when
+useful work and verified session history survive. Deliver the current authority
+delta and unfinished contract; retain exact originals on demand. Prove that the
+supported invocation resumes that session; a job resume or parsed session field
+alone does not prove provider-session reuse. Retaining an independent judge's
+session does not make them the author. A new vote needs a changed evidence basis.
+Keep original absolute deadlines distinct from phase/model ceilings and explicitly
+budget a separate commission; recovery setup is consumed time, not free headroom.
+
 ## Classify failures before commissioning repair
 
 For each consequential failed claim, separate independent evidence into a
@@ -94,6 +115,7 @@ context delivery.
 Persistence includes selection, situated work, reflection, genuinely
 developmental play, consolidation, dreaming, memory writeback, and later
 on-disk verification that the intended memory survived and affects work.
+Offer self-directed exploration without forcing participation or a growth claim.
 Inspection or backlog labor relabeled as play does not satisfy the lifecycle.
 Set retention, compaction, cleanup, and stop conditions before memory growth
 becomes an unowned resource leak.

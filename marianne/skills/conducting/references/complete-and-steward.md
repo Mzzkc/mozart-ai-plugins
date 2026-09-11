@@ -104,6 +104,25 @@ topology checks plus the affected live seam. A manifest- or custody-only
 change earns deterministic custody checks. Do not replay a whole-runtime suite
 without a whole-runtime change.
 
+## Preserve successful results across failed wrappers
+
+When a child succeeds but its parent parser, receipt, or terminal status fails,
+bind and independently inspect the child's exact output. Preserve the failed
+wrapper history and repair only the missing obligation; do not repeat successful
+physical acquisition merely to obtain a green job. Mechanical projection of an
+orchestration-owned manifest is labeled as such, not invented author testimony.
+Agent-owned semantic memory corrections remain with that agent.
+
+Keep diagnostic counterexamples and their nonzero exits visible. Acceptance
+commands must satisfy their declared result contracts; an all-exits-zero rule
+must not suppress useful failure evidence. Save a minimal substantive verdict
+with executed checks before optional additional investigation.
+
+For already-correct behavior, preserve baseline GREEN and prove assertions are
+non-vacuous; do not manufacture a RED. A collection failure is not an exercised
+behavioral assertion. Exact final-test replay supports causal evidence, but does
+not rewrite the chronology of when tests and implementation were authored.
+
 ## Steward resources and cleanup
 
 Inventory authoritative evidence separately from recreatable profiles, caches,

@@ -40,9 +40,9 @@ before execution, recompute custody on the final produced bytes and state, and
 replay the same causal proof after any mutation. At rerun completion,
 corroborate process or session termination and interaction state separately
 from checkpoint status, receipts, artifact validity, semantics, and validation.
-Use one fresh judge for the executed evidence unless another reviewer changes
-the evidence basis; multiple reviewers on the same evidence basis are one
-oracle.
+Use one independent judge for the executed evidence; retain their session when
+appropriate. Add another reviewer only when they change the evidence basis;
+multiple reviewers on the same evidence basis are one oracle.
 
 ## Commissioning performance work
 
@@ -57,6 +57,29 @@ The conductor may issue the brief, priority, proof obligation, and acceptance
 or rejection. The composer or score specialist authors the score. The same
 boundary applies to compiler changes, techniques, code, specs, designs,
 content, research, validation systems, and substantial revisions.
+
+## Rehearse the real handoff
+
+Commission exact producer/consumer schemas, machine-join values, resolved paths,
+working directories, scalar result types, output-size bounds, and one cheap
+prefreeze command. Supply a concrete valid example instead of making performers
+rediscover validators. Keep deterministic join fields separate from agent-authored
+semantic paragraphs. Use phase-owned logs or frozen snapshots so later lifecycle
+reads cannot append to a frozen Work subject.
+
+Rehearse the actual invocation through the last safe side-effect boundary with
+real receipt destinations and permissions. Syntax and helper tests do not execute
+remaining wrapper statements. Validate native rules and dry-render topology before
+reporting source ready. When submission is governed by a release lock, verify
+its existence and successful verification in the same conditional flow that
+permits submission.
+
+Discover current routing, session reuse, reload behavior, and capacity enforcement
+from actual source/profile/runtime evidence. A fixed authorized route needs its
+relevant capability/profile checks, not renewed model selection. Parsed options
+may be ignored; unchanged config bytes do not prove unchanged effective settings.
+Cross-profile provider reservations require observable coordination, not a momentary
+free-slot count. Missing native enforcement stays an explicit conductor obligation.
 
 ## Runtime doctrine
 

@@ -37,9 +37,9 @@ commissioning uses:
 
 ```bash
 python scripts/run_refresh.py \
-  --project-root ~/Projects/WORSKPACES/marianne-model-profile-refresh/worktrees/core \
-  --workspace-root ~/Projects/WORSKPACES/marianne-model-profile-refresh/score-runs \
-  --backup-root ~/Projects/WORSKPACES/marianne-model-profile-refresh/score-backups/manual
+  --project-root ~/Projects/WORKSPACES/marianne-model-profile-refresh/worktrees/core \
+  --workspace-root ~/Projects/WORKSPACES/marianne-model-profile-refresh/score-runs \
+  --backup-root ~/Projects/WORKSPACES/marianne-model-profile-refresh/score-backups/manual
 ```
 
 ## Artifacts and status

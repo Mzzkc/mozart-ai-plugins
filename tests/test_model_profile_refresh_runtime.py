@@ -25,7 +25,7 @@ RUNTIME_FILES = {
 LOCKED_RUNTIME = {
     "model-profile-refresh.yaml": "68baeeeb1f146a60604975ee5b1569c771bef444598dfcf19c6fb46691c36527",
     "request.md": "1aa18e78695a449a9a3bc80f68afab6e540a9f0527000744e65a41f993a9a84b",
-    "runbook.md": "717634d82d4ea11305ee6468a847196b6c9608c2af370008c7bcc6c3d27e8bc0",
+    "runbook.md": "108617890b5ccfcfcabf94e8fc8fda2f6a769db4182d9323909f4f7d08b28239",
     "scripts/refreshctl.py": "bd871b9e5bb224874b1916f8abfafb720418240be7569e3ef7e3e5568a71b45c",
     "scripts/run_refresh.py": "2bc0935ff209945e6433215e4b7370a46b4a97720c7982386eea744f94983fde",
     "technique/SKILL.md": "b73815fc8b70e2b71eae554b6fc7655e1e8ab638b7397ea33a6d14fdc5735427",
